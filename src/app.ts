@@ -1,0 +1,3 @@
+/*
+    Runs the app on the defined server port
+*/

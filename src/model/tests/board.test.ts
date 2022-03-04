@@ -1,7 +1,7 @@
 import { Move, moveToString, Position, positionToString, stringToMove, stringToPosition } from "../position"
 import ERRORS, { ErrorObject } from '../model-errors'
 import { Bishop, charToPiece, King, Knight, MoveState, Pawn, Piece, PieceColor, pieceToChar, Queen, Rook } from "../piece"
-import { BoardObject } from "../board"
+import { BoardObject, stringToBoard } from "../board"
 
 describe('Board Game Tests',() => {
 
@@ -267,6 +267,36 @@ describe('Board Game Tests',() => {
             board.turn = PieceColor.WHITE
 
             expect(board.findKingPosition()!!.toString()).toBe(stringToPosition("f2").toString())
+        })
+
+        test('Board to String default', () => {
+            const board = new BoardObject()
+            expect(board.toString()).toBe('rnbqkbnrpppppppp                                PPPPPPPPRNBQKBNR')
+        })
+
+        test('Board to String with move', () => {
+            const board = new BoardObject()
+            board.makeMove("pb2b4")
+            expect(board.toString()).toBe('rnbqkbnrpppppppp                 P              P PPPPPPRNBQKBNR')
+        })
+
+        test('Valid String to Board', () => {
+            const board = stringToBoard("rnbqkbnrppKppppp                                P PPPPPPRNBQKBNR")
+            expect(board?.getPieceAt(stringToPosition("c7"))?.toString()).toBe("K")
+            expect(board?.getPieceAt(stringToPosition("b2"))).toBeNull()
+            expect(board?.getPieceAt(stringToPosition("a2"))?.toString()).toBe("P")
+        })
+
+        test('Invalid String to Board', () => {
+            expect(expectThrow(stringToBoard, "dfgdfa")!!.message).toBe(ERRORS.BAD_BOARD_STRING.message)
+        })
+
+        test('String to Board to String to board', () => {
+            const board = stringToBoard("rnbqkbnrpppppppP                                P PPPPPPRNBQKBNR")!!
+            board.makeMove("pc2c4")
+            expect(board?.getPieceAt(stringToPosition("c4"))?.toString()).toBe("P")
+            expect(board?.getPieceAt(stringToPosition("h7"))?.toString()).toBe("P")
+            expect(board.toString()).toBe('rnbqkbnrpppppppP                  P             P  PPPPPRNBQKBNR')
         })
     })
 })

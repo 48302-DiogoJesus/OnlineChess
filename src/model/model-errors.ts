@@ -27,6 +27,10 @@ const MODEL_ERRORS = {
     ALREADY_OVER: {
         http_code: 500,
         message: 'This game is already over'
+    },
+    BAD_BOARD_STRING: {
+        http_code: 500,
+        message: "Invalid string. Can't convert to board"
     }
 }
 

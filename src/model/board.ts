@@ -13,7 +13,7 @@ import {
   pieceToChar,
   MoveState
 } from './piece'
-import { PositionObject, Position, stringToMove, range, Move } from './position'
+import { PositionObject, Position, stringToMove, Move } from './position'
 import ERRORS from './model-errors'
 
 export const BOARD_WIDTH = 8;
@@ -207,7 +207,7 @@ export class BoardObject {
   makeMove = (moveAsString: string) => {
     const move = stringToMove(moveAsString)
     const maybePromotionPiece = charToPiece(selectByPieceColor(this.turn, move.pieceChar.toUpperCase(), move.pieceChar.toLowerCase()))!!
-    const piece = this.getPieceAt(move.start) 
+    const piece = this.getPieceAt(move.start)
     const capturePiece = this.getPieceAt(move.end)
 
     if (this.winner !== null) {
@@ -290,9 +290,9 @@ export class BoardObject {
  * @param {boardAsString} Example of a default board: "rnbqkbnrpppppppp                                PPPPPPPPRNBQKBNR"
  * @returns A new BoardObject if {boardAsString} is convertible to a board, null if not
  */
-function stringToBoard(boardAsString: string): BoardObject | null {
-  if (boardAsString.length < BOARD_WIDTH * BOARD_HEIGHT)
-    return null
+export function stringToBoard(boardAsString: string): BoardObject | null {
+  if (boardAsString.length != BOARD_WIDTH * BOARD_HEIGHT)
+    throw ERRORS.BAD_BOARD_STRING
   const newBoard = new BoardObject()
   for (let row = 0, currChar = 0; row < BOARD_HEIGHT; row++) {
     for (let col = 0; col < BOARD_WIDTH; col++, currChar++) {

@@ -12,7 +12,7 @@ function range(x, min, max) {
 }
 exports.range = range;
 function positionToString(position) {
-    return `${'a' + position.column}${board_1.BOARD_HEIGHT - position.row}`;
+    return `${String.fromCharCode('a'.charCodeAt(0) + position.column)}${board_1.BOARD_HEIGHT - position.row}`;
 }
 exports.positionToString = positionToString;
 function stringToPosition(string) {
@@ -20,7 +20,7 @@ function stringToPosition(string) {
         throw model_errors_1.default.INVALID_POSITION_CONVERSION;
     const column = string.charCodeAt(0) - 'a'.charCodeAt(0);
     const row = ('0'.charCodeAt(0) + board_1.BOARD_HEIGHT) - string.charCodeAt(1);
-    if (!range(column, 0, board_1.BOARD_WIDTH) || !range(row, 0, board_1.BOARD_HEIGHT))
+    if (!range(column, 0, board_1.BOARD_WIDTH - 1) || !range(row, 0, board_1.BOARD_HEIGHT - 1))
         throw model_errors_1.default.INVALID_POSITION_CONVERSION;
     return (0, exports.Position)(column, row);
 }

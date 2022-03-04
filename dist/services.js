@@ -9,15 +9,43 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.gameExists = exports.updateGame = exports.createGame = void 0;
+exports.gameExists = exports.updateGame = exports.isValidMove = exports.createGame = void 0;
 const games_1 = require("./db/games");
-function createGame(gameObject) {
+const board_1 = require("./model/board");
+function createGame(game_id, player_white) {
     return __awaiter(this, void 0, void 0, function* () {
+        // Build Remote Game Object
+        const defaultBoard = new board_1.BoardObject();
+        const gameObject = {
+            _id: game_id,
+            player_white,
+            player_black: null,
+            board: defaultBoard.toString(),
+            turn: defaultBoard.turn,
+            winner: defaultBoard.winner
+        };
         // Later do token and authorization validations here ! dont forget AWAIT THEN!
         return yield (0, games_1.createGame)(gameObject);
     });
 }
 exports.createGame = createGame;
+function isValidMove(game_id, move) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const gameObject = yield (0, games_1.getGame)(game_id);
+        const testBoard = (0, board_1.stringToBoard)(gameObject.board);
+        // If remote game as string is invalid just delete it
+        if (testBoard === null) {
+            yield (0, games_1.deleteGame)(game_id);
+            return false;
+        }
+        // If not valid, makeMove throws and api handles error
+        testBoard.makeMove(move);
+        // Update remote game
+        updateGame(Object.assign(Object.assign({}, gameObject), { board: testBoard.toString(), winner: testBoard.winner, turn: testBoard.turn }));
+        return true;
+    });
+}
+exports.isValidMove = isValidMove;
 function updateGame(gameObject) {
     return __awaiter(this, void 0, void 0, function* () {
         // Later do token and authorization validations here

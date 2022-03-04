@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.pieceToChar = exports.charToPiece = exports.Pawn = exports.Knight = exports.Queen = exports.Bishop = exports.Rook = exports.King = exports.Piece = exports.MoveState = exports.PieceType = exports.selectByPieceColor = exports.getOpponent = exports.PieceColor = void 0;
+const position_1 = require("./position");
 /**
  * Piece Object
  * Schema of a PieceObject
@@ -78,7 +79,7 @@ class Piece {
     constructor() {
         this.pathBlocked = (move, board) => {
             const direction = calculateDirection(move);
-            let current = move.start;
+            const current = (0, position_1.Position)(move.start.column, move.start.row);
             while (true) {
                 if (direction.has(Direction.UP))
                     current.row--;
@@ -88,15 +89,16 @@ class Piece {
                     current.column--;
                 if (direction.has(Direction.RIGHT))
                     current.column++;
-                if (current === move.end)
+                if (current.column == move.end.column && current.row == move.end.row) {
                     return false;
+                }
                 if (board.getPieceAt(current) !== null)
                     return true;
             }
         };
         this.destinationBlocked = (move, board) => {
             const other = board.getPieceAt(move.end);
-            if (other === null)
+            if (other == null || other == undefined)
                 return false;
             return other.color == this.color;
         };
@@ -106,12 +108,13 @@ class Piece {
             return MoveState.NO_CHANGE;
         if (!this.validPath(move, board))
             return MoveState.PATH_INVALID;
-        if (this.pathBlocked(move, board))
+        if (!(board.getPieceAt(move.start) instanceof Knight) && this.pathBlocked(move, board))
             return MoveState.PATH_BLOCKED;
         if (this.destinationBlocked(move, board))
             return MoveState.DEST_BLOCKED;
         return MoveState.OK;
     }
+    ;
 }
 exports.Piece = Piece;
 class King extends Piece {
@@ -166,9 +169,8 @@ class Knight extends Piece {
     constructor(pieceColor) {
         super();
         this.validPath = (move, board) => {
-            return move.start.row == move.end.row
-                || move.start.column == move.end.column
-                || Math.abs(move.start.row - move.end.row) == Math.abs(move.start.column - move.end.column);
+            return Math.abs(move.end.column - move.start.column) == 2 && Math.abs(move.end.row - move.start.row) == 1
+                || Math.abs(move.end.column - move.start.column) == 1 && Math.abs(move.end.row - move.start.row) == 2;
         };
         this.toString = () => (0, exports.pieceToChar)(this);
         this.color = pieceColor;
@@ -186,13 +188,15 @@ class Pawn extends Piece {
             // Vertical movement
             move.start.column == move.end.column
                 && (direction == -1 ?
-                    board.getPieceAt(move.end) == null && move.start.row > move.end.row && move.start.row - move.end.row <= steps
+                    (board.getPieceAt(move.end) == null && move.start.row > move.end.row && move.start.row - move.end.row <= steps)
                     :
-                        board.getPieceAt(move.end) == null && move.end.row > move.start.row && move.end.row - move.start.row <= steps)) || (
-            // Horizontal movement
-            Math.abs(move.start.column - move.end.column) == 1
-                && move.end.row - move.start.row == direction
-                && board.getPieceAt(move.end) != null);
+                        (board.getPieceAt(move.end) == null && move.end.row > move.start.row && move.end.row - move.start.row <= steps)))
+                ||
+                    (
+                    // Horizontal movement
+                    Math.abs(move.start.column - move.end.column) == 1
+                        && move.end.row - move.start.row == direction
+                        && board.getPieceAt(move.end) != null);
         };
         this.toString = () => (0, exports.pieceToChar)(this);
         this.color = pieceColor;

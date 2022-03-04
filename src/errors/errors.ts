@@ -11,6 +11,14 @@ const GAME_ERRORS = {
     GAME_DOES_NOT_EXIST: {
         http_code: 404,
         message: "Game with that ID does not exist"
+    },
+    INVALID_GAMEID_LENGTH: {
+        http_code: 400,
+        message: "The GameID should have between 5 and 20 characters"
+    },
+    INVALID_GAMEID_CHARACTERS: { 
+        http_code: 400,
+        message: "The GameID should contain alphanumeric characters, '_'(underline) and '-'(dash)"
     }
 }
 
@@ -23,10 +31,60 @@ const API_ERRORS = {
     }
 }
 
+const USER_ERRORS = {
+    INVALID_USERNAME_LENGTH: { 
+        http_code: 400,
+        message: 'Username should have between 5 and 25 characters'
+    },
+    INVALID_USERNAME_CHARACTERS: { 
+        http_code: 400,
+        message: "The Username should contain alphanumeric characters"
+    },
+    USER_DOES_NOT_EXIST: {
+        http_code: 400,
+        message: "User does not exist"
+    },
+    USER_ALREADY_EXISTS: {
+        http_code: 409,
+        message: "User already exists"
+    },
+    INVALID_PASSWORD_LENGTH: { 
+        http_code: 400,
+        message: 'Password should have between 5 and 25 characters'
+    },
+    INVALID_PASSWORD_CHARACTERS: { 
+        http_code: 400,
+        message: "The Password should contain alphanumeric characters"
+    },
+    INVALID_PASSWORD_UPPERCASE: { 
+        http_code: 400,
+        message: "The Password should contain at least 1 uppercase character"
+    },
+    WRONG_PASSWORD: { 
+        http_code: 400,
+        message: "Wrong password for that username"
+    },
+    INVALID_TOKEN: {
+        http_code: 401,
+        message: "You need to be authenticated to perform that operation"
+    },
+    NOT_AUTHORIZED: {
+        http_code: 403,
+        message: "Forbidden Action"
+    }
+}
+
 // ALL ERRORS
 const errors = {
     ...GAME_ERRORS,
-    ...API_ERRORS
+    ...API_ERRORS,
+    ...USER_ERRORS,
+    UNKNOWN_ERROR: (code: number = 500, message: string = "Unknown error") => {
+        return {
+            http_code: code,
+            message: message
+        }
+    }
 }
 
 export default errors;

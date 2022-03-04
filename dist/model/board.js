@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BoardObject = exports.BOARD_HEIGHT = exports.BOARD_WIDTH = void 0;
+exports.stringToBoard = exports.BoardObject = exports.BOARD_HEIGHT = exports.BOARD_WIDTH = void 0;
 const piece_1 = require("./piece");
 const position_1 = require("./position");
 const model_errors_1 = __importDefault(require("./model-errors"));
@@ -39,8 +39,8 @@ class BoardObject {
          */
         this.getPieceAt = (position) => this.board[position.row][position.column];
         this.findKingPosition = () => {
-            for (let row = 0; row <= exports.BOARD_HEIGHT; row++) {
-                for (let col = 0; col <= exports.BOARD_WIDTH; col++) {
+            for (let row = 0; row < exports.BOARD_HEIGHT; row++) {
+                for (let col = 0; col < exports.BOARD_WIDTH; col++) {
                     const currentPosition = (0, position_1.Position)(col, row);
                     const currentPiece = this.getPieceAt(currentPosition);
                     if (currentPiece instanceof piece_1.King && this.turn == currentPiece.color)
@@ -54,32 +54,35 @@ class BoardObject {
             const piece = this.getPieceAt(piecePosition);
             if (piece === null)
                 return possibleEndPositions;
-            for (let row = 0; row <= exports.BOARD_HEIGHT; row++) {
-                for (let col = 0; col <= exports.BOARD_WIDTH; col++) {
+            for (let row = 0; row < exports.BOARD_HEIGHT; row++) {
+                for (let col = 0; col < exports.BOARD_WIDTH; col++) {
                     const currentPosition = (0, position_1.Position)(col, row);
                     const pieceAtEndPos = this.getPieceAt((0, position_1.Position)(col, row));
-                    // If piece at end position is not null but the piece is from the same player trying to make the move don't try it
+                    // If piece is from the same player trying to make the move don't try it
                     if (pieceAtEndPos != null && pieceAtEndPos.color == piece.color)
                         continue;
                     const moveState = piece.checkMove((0, position_1.Move)((0, piece_1.pieceToChar)(piece), piecePosition, currentPosition), this);
-                    if (moveState == piece_1.MoveState.OK)
+                    if (moveState == piece_1.MoveState.OK) {
                         possibleEndPositions.add(currentPosition);
+                    }
                 }
             }
             return possibleEndPositions;
         };
+        this.isInCheckMate = () => this.isInCheck() && (this.generateSafeKingTargets().size === 0);
         this.isInCheck = () => {
             const kingPosition = this.findKingPosition();
             if (kingPosition === null)
                 return false;
-            for (let row = 0; row <= exports.BOARD_HEIGHT; row++) {
-                for (let col = 0; col <= exports.BOARD_WIDTH; col++) {
+            for (let row = 0; row < exports.BOARD_HEIGHT; row++) {
+                for (let col = 0; col < exports.BOARD_WIDTH; col++) {
                     const piecePosition = (0, position_1.Position)(col, row);
                     const piece = this.getPieceAt(piecePosition);
                     if (piece != null && piece.color == (0, piece_1.getOpponent)(this.turn)) {
                         const possibleMovesForPiece = this.generateAllPossibleTargets(piecePosition);
-                        if (possibleMovesForPiece.has(kingPosition)) {
-                            return true;
+                        for (const move of possibleMovesForPiece) {
+                            if (move.column === kingPosition.column && move.row === kingPosition.row)
+                                return true;
                         }
                     }
                 }
@@ -88,19 +91,22 @@ class BoardObject {
         };
         this.makeMove = (moveAsString) => {
             const move = (0, position_1.stringToMove)(moveAsString);
-            const maybePromotionPiece = (0, piece_1.charToPiece)(move.pieceChar);
+            const maybePromotionPiece = (0, piece_1.charToPiece)((0, piece_1.selectByPieceColor)(this.turn, move.pieceChar.toUpperCase(), move.pieceChar.toLowerCase()));
             const piece = this.getPieceAt(move.start);
             const capturePiece = this.getPieceAt(move.end);
+            if (this.winner !== null) {
+                throw model_errors_1.default.ALREADY_OVER;
+            }
             if (piece === null)
                 throw model_errors_1.default.NO_PIECE_AT_START_POSITION;
-            if (piece instanceof piece_1.King || !this.isInCheck()) {
+            if (!(piece instanceof piece_1.King) && this.isInCheck()) {
                 throw model_errors_1.default.KING_IN_CHECK;
             }
             if (
             // When true means Promotion
-            maybePromotionPiece.toString() != piece.toString() &&
+            maybePromotionPiece.toString().toUpperCase() != piece.toString().toUpperCase() &&
                 // Check if it is a Pawn and if it's not a game winning move
-                piece instanceof piece_1.Pawn && capturePiece instanceof piece_1.King &&
+                (piece instanceof piece_1.Pawn) && !(capturePiece instanceof piece_1.King) &&
                 // Check if it's valid promotion piece
                 (maybePromotionPiece instanceof piece_1.Knight || maybePromotionPiece instanceof piece_1.Queen || maybePromotionPiece instanceof piece_1.Bishop || maybePromotionPiece instanceof piece_1.Rook)) {
                 // Transform pawn
@@ -163,8 +169,8 @@ class BoardObject {
         for (const target of possibleKingTargets) {
             // Remove King from the board to corretly make the predictions
             // For all the board pieces
-            for (let row = 0; row <= exports.BOARD_HEIGHT; row++) {
-                for (let col = 0; col <= exports.BOARD_WIDTH; col++) {
+            for (let row = 0; row < exports.BOARD_HEIGHT; row++) {
+                for (let col = 0; col < exports.BOARD_WIDTH; col++) {
                     const enemyPosition = (0, position_1.Position)(col, row);
                     const enemyPiece = this.getPieceAt(enemyPosition);
                     const targetPiece = this.getPieceAt(target);
@@ -193,8 +199,9 @@ class BoardObject {
                         }
                         // Remove suicide targets
                         for (const enemyTarget of possibleEnemyTargets) {
-                            if (possibleKingTargets.has(enemyTarget)) {
-                                collisions.add(enemyTarget);
+                            for (const target of possibleKingTargets) {
+                                if (enemyTarget.column === target.column && enemyTarget.row === target.row)
+                                    collisions.add(enemyTarget);
                             }
                         }
                     }
@@ -244,8 +251,8 @@ exports.BoardObject = BoardObject;
  * @returns A new BoardObject if {boardAsString} is convertible to a board, null if not
  */
 function stringToBoard(boardAsString) {
-    if (boardAsString.length < exports.BOARD_WIDTH * exports.BOARD_HEIGHT)
-        return null;
+    if (boardAsString.length != exports.BOARD_WIDTH * exports.BOARD_HEIGHT)
+        throw model_errors_1.default.BAD_BOARD_STRING;
     const newBoard = new BoardObject();
     for (let row = 0, currChar = 0; row < exports.BOARD_HEIGHT; row++) {
         for (let col = 0; col < exports.BOARD_WIDTH; col++, currChar++) {
@@ -257,3 +264,4 @@ function stringToBoard(boardAsString) {
     }
     return newBoard;
 }
+exports.stringToBoard = stringToBoard;

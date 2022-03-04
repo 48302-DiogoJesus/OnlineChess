@@ -12,52 +12,39 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.gameExists = exports.updateGame = exports.createGame = void 0;
-const mongoose_1 = __importDefault(require("mongoose"));
+exports.deleteGame = exports.getGame = exports.gameExists = exports.updateGame = exports.createGame = void 0;
+const common_1 = require("./common");
 const game_1 = __importDefault(require("./schemas/game"));
-const config_1 = __importDefault(require("../config/config"));
-const connectionURL = config_1.default.MONGO_DB.REMOTE ?
-    `mongodb+srv://${config_1.default.MONGO_DB.USERNAME}:${config_1.default.MONGO_DB.PASSWORD}@mycluster.h5qxe.mongodb.net/${config_1.default.MONGO_DB.DB_NAME}?retryWrites=true&w=majority`
-    :
-        `mongodb://127.0.0.1:27017/${config_1.default.MONGO_DB.DB_NAME}`;
-function executeInDB(block) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield mongoose_1.default.connect(connectionURL);
-        let result;
-        try {
-            result = yield block();
-        }
-        catch (err) {
-            // Evaluate Mongo Error -> Convert to "our" error format -> throw it formatted 
-            result = false;
-        }
-        yield mongoose_1.default.connection.close();
-        return result;
-    });
+const errors_1 = __importDefault(require("../errors/errors"));
+function validateGameID(game_id) {
+    if (!(game_id.length >= 4 && game_id.length <= 20)) {
+        throw errors_1.default.INVALID_GAMEID_LENGTH;
+    }
+    if (!/^[a-zA-Z0-9_-]*$/.test(game_id)) {
+        throw errors_1.default.INVALID_GAMEID_CHARACTERS;
+    }
 }
 /* ---------------------- MAIN FUNCTIONS ---------------------- */
-// | createGame | updateGame | gameExists | 
+// | createGame | updateGame | gameExists | getGame | deleteGame |
 function createGame(gameObject) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return executeInDB(() => __awaiter(this, void 0, void 0, function* () {
-            if (yield gameExists(gameObject._id, true)) {
-                return false;
-            }
-            yield (new game_1.default(gameObject)).save();
-            return true;
-        }));
-    });
+    validateGameID(gameObject._id);
+    return (0, common_1.executeInDB)(() => __awaiter(this, void 0, void 0, function* () {
+        if (yield gameExists(gameObject._id, true)) {
+            throw errors_1.default.GAME_DOES_NOT_EXIST;
+        }
+        yield (new game_1.default(gameObject)).save();
+        return true;
+    }));
 }
 exports.createGame = createGame;
 function updateGame(gameObject) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return executeInDB(() => __awaiter(this, void 0, void 0, function* () {
-            if (!(yield gameExists(gameObject._id, true)))
-                return false;
-            yield game_1.default.findOneAndUpdate({ _id: gameObject._id }, gameObject);
-            return true;
-        }));
-    });
+    validateGameID(gameObject._id);
+    return (0, common_1.executeInDB)(() => __awaiter(this, void 0, void 0, function* () {
+        if (!(yield gameExists(gameObject._id, true)))
+            throw errors_1.default.GAME_DOES_NOT_EXIST;
+        yield game_1.default.findOneAndUpdate({ _id: gameObject._id }, gameObject);
+        return true;
+    }));
 }
 exports.updateGame = updateGame;
 function gameExists(game_id, already_connected = false) {
@@ -65,12 +52,30 @@ function gameExists(game_id, already_connected = false) {
         const block = () => __awaiter(this, void 0, void 0, function* () { return (yield game_1.default.findById(game_id)) !== null; });
         if (already_connected)
             return yield block();
-        return executeInDB(() => __awaiter(this, void 0, void 0, function* () {
+        return (0, common_1.executeInDB)(() => __awaiter(this, void 0, void 0, function* () {
             return yield block();
         }));
     });
 }
 exports.gameExists = gameExists;
+function getGame(game_id) {
+    return (0, common_1.executeInDB)(() => __awaiter(this, void 0, void 0, function* () {
+        if (!gameExists(game_id, true))
+            throw errors_1.default.GAME_DOES_NOT_EXIST;
+        const gameObject = yield game_1.default.findOne({ _id: game_id });
+        return gameObject;
+    }));
+}
+exports.getGame = getGame;
+function deleteGame(game_id) {
+    validateGameID(game_id);
+    return (0, common_1.executeInDB)(() => __awaiter(this, void 0, void 0, function* () {
+        if (!gameExists(game_id, true))
+            throw errors_1.default.GAME_DOES_NOT_EXIST;
+        yield game_1.default.deleteOne({ _id: game_id });
+    }));
+}
+exports.deleteGame = deleteGame;
 // ! TEST FUNCTION FOR THIS MODULE ! \\
 /*
 const testCGame = {

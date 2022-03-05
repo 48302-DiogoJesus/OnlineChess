@@ -1,7 +1,7 @@
-import { Move, moveToString, Position, positionToString, stringToMove, stringToPosition } from "../position"
-import ERRORS, { ErrorObject } from '../model-errors'
-import { Bishop, charToPiece, King, Knight, MoveState, Pawn, Piece, PieceColor, pieceToChar, Queen, Rook } from "../piece"
-import { BoardObject, stringToBoard } from "../board"
+import { Move, moveToString, Position, positionToString, stringToMove, stringToPosition } from "../model/position"
+import ERRORS, { ErrorObject } from '../errors/errors'
+import { Bishop, charToPiece, King, Knight, MoveState, Pawn, Piece, PieceColor, pieceToChar, Queen, Rook } from "../model/piece"
+import { BoardObject, stringToBoard } from "../model/board"
 
 describe('Board Game Tests',() => {
 

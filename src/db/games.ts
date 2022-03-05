@@ -13,79 +13,61 @@ function validateGameID(game_id: string) {
     */
 }
 
-/* ---------------------- MAIN FUNCTIONS ---------------------- */
-// | createGame | updateGame | gameExists | getGame | deleteGame |
+const bundled = {
+    createGame, updateGame, gameExists, getGame, getGames, deleteGame
+}
 
-export function createGame(gameObject: GameObject) {
-    validateGameID(gameObject._id)
+export default bundled
+
+/* ---------------------- MAIN FUNCTIONS ---------------------- */
+// | createGame | updateGame | gameExists | getGame | getGames | deleteGame |
+
+const MAX_GAMES_RETRIEVED = 200
+
+export function getGames(limit: boolean = false) {
     return executeInDB(async () => {
-        if (await gameExists(gameObject._id, true)) {
-            throw ERRORS.GAME_DOES_NOT_EXIST
-        }
+        var games = []
+        if (limit)
+            games = await GameSchema.find().limit(MAX_GAMES_RETRIEVED)
+        else 
+            games = await GameSchema.find()
+        return games
+    })
+}
+
+export function createGame(gameObject: GameObject, bypass_game_id_validation: boolean = false) {
+    if (!bypass_game_id_validation)
+        validateGameID(gameObject._id)
+
+    return executeInDB(async () => {
         await (new GameSchema(gameObject)).save()
         return true
     })
 }
 
 export function updateGame(gameObject: GameObject) {
-    validateGameID(gameObject._id)
     return executeInDB(async () => {
-        if (!await gameExists(gameObject._id, true))
-            throw ERRORS.GAME_DOES_NOT_EXIST
         await GameSchema.findOneAndUpdate({ _id: gameObject._id}, gameObject)
         return true
     })
 }
 
-export async function gameExists(game_id: string, already_connected: boolean = false) {
-
-    const block = async () => await GameSchema.findById(game_id) !== null
-
-    if (already_connected)
-        return await block()
-
+export function gameExists(game_id: string) {
     return executeInDB(async () => {
-        return await block()
+        return (await GameSchema.findById(game_id)) !== null
     })
 }
 
 export function getGame(game_id: string): Promise<GameObject> {
     return executeInDB(async () => {
-        if (!gameExists(game_id, true))
-            throw ERRORS.GAME_DOES_NOT_EXIST
-
-        const gameObject = (await GameSchema.findOne({ _id: game_id }) as GameObject)
-        return gameObject
+        const gameObject = await GameSchema.findById(game_id)
+        return gameObject._doc as GameObject
     })
 }
 
-export function deleteGame(game_id: string): Promise<void> {
-    validateGameID(game_id)
+export function deleteGame(game_id: string): Promise<boolean> {
     return executeInDB(async () => {
-        if (!gameExists(game_id, true))
-            throw ERRORS.GAME_DOES_NOT_EXIST
-
         await GameSchema.deleteOne({ _id: game_id })
+        return true
     })
-} 
-
-// ! TEST FUNCTION FOR THIS MODULE ! \\
-/*
-const testCGame = {
-    _id: 'Test Game',
-    board: ' ',
-    turn: PieceColor.BLACK,
-    winner: PieceColor.WHITE
 }
-const testUGame = {
-    _id: 'Test Game',
-    board: ' ',
-    turn: PieceColor.BLACK,
-    winner: PieceColor.WHITE
-}
-async function test() {
-    console.log(await createGame(testCGame))
-    //console.log(await updateGame(testUGame))
-}
-test()
-*/

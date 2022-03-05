@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.executeInDB = exports.connectionURL = void 0;
-const config_1 = __importDefault(require("../config/config"));
+const config_1 = __importDefault(require("../config"));
 const mongoose_1 = __importDefault(require("mongoose"));
 exports.connectionURL = config_1.default.MONGO_DB.REMOTE ?
     `mongodb+srv://${config_1.default.MONGO_DB.USERNAME}:${config_1.default.MONGO_DB.PASSWORD}@mycluster.h5qxe.mongodb.net/${config_1.default.MONGO_DB.DB_NAME}?retryWrites=true&w=majority`

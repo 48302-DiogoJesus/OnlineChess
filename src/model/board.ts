@@ -14,7 +14,7 @@ import {
   MoveState
 } from './piece'
 import { PositionObject, Position, stringToMove, Move } from './position'
-import ERRORS from './model-errors'
+import ERRORS from '../errors/errors'
 
 export const BOARD_WIDTH = 8;
 export const BOARD_HEIGHT = 8;

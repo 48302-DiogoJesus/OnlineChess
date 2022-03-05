@@ -19,6 +19,10 @@ const GAME_ERRORS = {
     INVALID_GAMEID_CHARACTERS: { 
         http_code: 400,
         message: "The GameID should contain alphanumeric characters, '_'(underline) and '-'(dash)"
+    },
+    NOT_AUTHORIZED_TO_CONNECT: { 
+        http_code: 403,
+        message: 'You are not allowed to connect to this game'
     }
 }
 
@@ -74,17 +78,53 @@ const USER_ERRORS = {
     }
 }
 
+const BOARD_ERRORS = {
+    INVALID_MOVE_CONVERSION: {
+        http_code: 500,
+        message: 'Can not convert to Move'
+    },
+    INVALID_POSITION_CONVERSION: {
+        http_code: 500,
+        message: 'Can not convert to Position'
+    },
+    NO_PIECE_AT_START_POSITION: {
+        http_code: 500,
+        message: 'MakeMove called with no piece at start position'
+    },
+    KING_IN_CHECK: {
+        http_code: 500,
+        message: 'Your King is in check. You need to play the King!'
+    },
+    INVALID_MOVE: {
+        http_code: 500,
+        message: 'Invalid Piece Move'
+    },
+    ALREADY_OVER: {
+        http_code: 500,
+        message: 'This game is already over'
+    },
+    BAD_BOARD_STRING: {
+        http_code: 500,
+        message: "Invalid string. Can't convert to board"
+    },
+    NOT_YOUR_TURN: {
+        http_code: 403,
+        message: "It's not your turn!"
+    }
+}
+
 // ALL ERRORS
 const errors = {
-    ...GAME_ERRORS,
-    ...API_ERRORS,
-    ...USER_ERRORS,
     UNKNOWN_ERROR: (code: number = 500, message: string = "Unknown error") => {
         return {
             http_code: code,
             message: message
         }
-    }
+    },
+    ...GAME_ERRORS,
+    ...API_ERRORS,
+    ...USER_ERRORS,
+    ...BOARD_ERRORS
 }
 
 export default errors;

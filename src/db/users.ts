@@ -7,7 +7,7 @@ import { randomUUID as genRandomToken } from "crypto"
 import md5 from "md5"
 
 export function validateUserName(username: string) {
-    if (!(username.length >= 4 && username.length <= 20)) {
+    if (!(username.length >= 5 && username.length <= 20)) {
         throw ERRORS.INVALID_USERNAME_LENGTH
     }
     /*
@@ -18,7 +18,7 @@ export function validateUserName(username: string) {
 }
 
 export function validatePassword(password: string) {
-    if (!(password.length >= 4 && password.length <= 20)) {
+    if (!(password.length >= 5 && password.length <= 20)) {
         throw ERRORS.INVALID_PASSWORD_LENGTH
     }
     /*
@@ -32,39 +32,26 @@ export function validatePassword(password: string) {
 } 
 
 /* ---------------------- MAIN FUNCTIONS ---------------------- */
-// | userExists | createUser | deleteUser | getUserPublic | getUserAuthenticationInfo | tokenToUsername |
+// | userExists | createUser | deleteUser | getUserPublic | tokenToUsername |
 // | updateUserPassword | updateUserPublic | validateCredentials | 
 
 const bundled = {
-    validateUserName, validatePassword, userExists, createUser, deleteUser, getUserPublic, getUserAuthenticationInfo, 
-    tokenToUsername, updateUserPassword, updateUserPublic, validateCredentials
+    validateUserName, validatePassword, userExists, createUser, deleteUser, getUserPublic, 
+    getUsers, tokenToUsername, updateUserPassword, updateUserPublic, validateCredentials
 }
 
 export default bundled
 
-export async function userExists(username: string, already_connected: boolean = false): Promise<boolean> {
-    const block = async () => await UserAuthenticationSchema.findOne({ _id: username })
-
-    if (already_connected) {
-        if (await block() !== null)
-            return true
-        return false
-    }
+export function userExists(username: string): Promise<boolean> {
     return executeInDB(async () => {
-        if (await block() !== null)
+        if ((await UserAuthenticationSchema.findOne({ _id: username })) !== null)
             return true
         return false
     })
 }
 
-export async function createUser(username: string, password: string): Promise<string> {
-    // Throws if not valid
-    validateUserName(username)
-    validatePassword(password)
-
+export function createUser(username: string, password: string): Promise<string> {
     return executeInDB(async () => {
-        if (await userExists(username, true))
-            throw ERRORS.USER_ALREADY_EXISTS
         
         const token = genRandomToken()
         const hashedPassword = md5(password)
@@ -88,10 +75,8 @@ export async function createUser(username: string, password: string): Promise<st
     })
 }
 
-export async function deleteUser(username: string): Promise<void> {
+export function deleteUser(username: string): Promise<void> {
     return executeInDB(async () => {
-        if (!(await userExists(username, true)))
-            throw ERRORS.USER_DOES_NOT_EXIST
         await Promise.all([
             UserAuthenticationSchema.deleteOne({ _id: username }),
             UserPublicSchema.deleteOne({ _id: username }),
@@ -101,82 +86,63 @@ export async function deleteUser(username: string): Promise<void> {
     })
 }
 
-export async function getUserPublic(username: string): Promise<UserPublicObject> {
+export function getUserPublic(username: string): Promise<UserPublicObject> {
     return executeInDB(async () => {
-
-        if (!(await userExists(username, true)))
-            throw ERRORS.USER_DOES_NOT_EXIST
-
-        const publicUserDoc = await UserPublicSchema.findOne({ _id: username })
-
-        if (publicUserDoc === null)
-            throw ERRORS.UNKNOWN_ERROR(500, `Could not get public user information for ${username}`)
-
+        const publicUserDoc = await UserPublicSchema.findById(username)
         return (publicUserDoc as UserPublicObject)
     })
 }
-
-export async function getUserAuthenticationInfo(username: string, already_connected: boolean = false): Promise<UserAuthenticationObject> {
-    
-    if (already_connected) {
-        const userAuthDoc = await UserAuthenticationSchema.findOne({ _id: username })
-        return (userAuthDoc as UserAuthenticationObject)
-    }
-
+/*
+export async function getUserAuthenticationInfo(username: string): Promise<UserAuthenticationObject> {
     return executeInDB(async () => {
-        if (!(await userExists(username, true)))
-            throw ERRORS.USER_DOES_NOT_EXIST
-        
         const userAuthDoc = await UserAuthenticationSchema.findOne({ _id: username })
         return (userAuthDoc as UserAuthenticationObject)
     })
 }
-
-export async function tokenToUsername(token: string): Promise<string> {
+*/
+export function tokenToUsername(token: string): Promise<string> {
     return executeInDB(async () => {
-        const userTokenDoc = await UserTokenSchema.findOne({ _id: token })
+        const userTokenDoc = await UserTokenSchema.findById(token)
         if (userTokenDoc === null)
             throw ERRORS.INVALID_TOKEN
         return (userTokenDoc as UserTokenObject).username
     })
 }
 
-export async function updateUserPassword(username: string, new_password: string): Promise<void> {
+export function updateUserPassword(username: string, new_password: string): Promise<void> {
     return executeInDB(async () => {
-        if (!await userExists(username, true))
-            throw ERRORS.USER_DOES_NOT_EXIST
-        
-        validatePassword(new_password)
-        
-        await UserAuthenticationSchema.findOneAndUpdate({ _id: username }, {
+        await UserAuthenticationSchema.findOneAndUpdate(
+        {
+            _id: username 
+        }, 
+        {
             password: md5(new_password)
         })
         return
     })
 }
 
-export async function updateUserPublic(username: string, userData: UserPublicObject) {
+export function updateUserPublic(username: string, userData: UserPublicObject) {
     return executeInDB(async () => {
-        if (!await userExists(username, true))
-            throw ERRORS.USER_DOES_NOT_EXIST
-
+        // Filter _id from the object 
         const { _id, ...updatedUserData } = userData
-        console.log(updatedUserData)
         await UserPublicSchema.findOneAndUpdate({ _id: username }, {
             ...updatedUserData,
         })
     })
 }
 
-export async function validateCredentials(username: string, password: string): Promise<void> {
-    return executeInDB(async () => {
-        if (!await userExists(username, true))
-            throw ERRORS.USER_DOES_NOT_EXIST
-        
-            const userCredentials = (await getUserAuthenticationInfo(username, true))
-            
-            if (userCredentials.password !== md5(password))
-                throw ERRORS.WRONG_PASSWORD
-            return true
+export function validateCredentials(username: string, password: string): Promise<void> {
+    return executeInDB(async () => {        
+        const userCredentials = (await UserAuthenticationSchema.findById(username)) as UserAuthenticationObject
+        if (userCredentials.password !== md5(password))
+            throw ERRORS.WRONG_PASSWORD
+        return userCredentials.token
+    })
+}
+
+export function getUsers(): Promise<UserPublicObject[]> {
+    return executeInDB(async () => {        
+        return await UserPublicSchema.find()
     })
 }

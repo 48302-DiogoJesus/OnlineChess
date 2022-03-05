@@ -1,4 +1,4 @@
-import CONFIG from '../config/config'
+import CONFIG from '../config'
 import mongoose from 'mongoose';
 
 export const connectionURL = CONFIG.MONGO_DB.REMOTE ? 

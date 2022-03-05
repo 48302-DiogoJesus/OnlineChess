@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.stringToBoard = exports.BoardObject = exports.BOARD_HEIGHT = exports.BOARD_WIDTH = void 0;
 const piece_1 = require("./piece");
 const position_1 = require("./position");
-const model_errors_1 = __importDefault(require("./model-errors"));
+const errors_1 = __importDefault(require("../errors/errors"));
 exports.BOARD_WIDTH = 8;
 exports.BOARD_HEIGHT = 8;
 /**
@@ -95,12 +95,12 @@ class BoardObject {
             const piece = this.getPieceAt(move.start);
             const capturePiece = this.getPieceAt(move.end);
             if (this.winner !== null) {
-                throw model_errors_1.default.ALREADY_OVER;
+                throw errors_1.default.ALREADY_OVER;
             }
             if (piece === null)
-                throw model_errors_1.default.NO_PIECE_AT_START_POSITION;
+                throw errors_1.default.NO_PIECE_AT_START_POSITION;
             if (!(piece instanceof piece_1.King) && this.isInCheck()) {
-                throw model_errors_1.default.KING_IN_CHECK;
+                throw errors_1.default.KING_IN_CHECK;
             }
             if (
             // When true means Promotion
@@ -252,7 +252,7 @@ exports.BoardObject = BoardObject;
  */
 function stringToBoard(boardAsString) {
     if (boardAsString.length != exports.BOARD_WIDTH * exports.BOARD_HEIGHT)
-        throw model_errors_1.default.BAD_BOARD_STRING;
+        throw errors_1.default.BAD_BOARD_STRING;
     const newBoard = new BoardObject();
     for (let row = 0, currChar = 0; row < exports.BOARD_HEIGHT; row++) {
         for (let col = 0; col < exports.BOARD_WIDTH; col++, currChar++) {

@@ -1,23 +1,10 @@
 import { Router, Response, Request} from "express";
-import ERRORS, { ErrorObject } from '../../errors/errors'
-import { createGame, gameExists } from "../../services";
+import ERRORS, { ErrorObject } from '../errors/errors'
+import { createGame, gameExists } from "../services";
+import { executeSafe, getToken } from "./common";
 
 const router = Router()
-
-async function executeSafe(res : Response, block: (...args: any[]) => any) {
-    try {
-        await block()
-    } catch (err: any) {
-        if (err.http_code === undefined) {
-            res.status(500).json({ error: err })
-        } else {
-            res.status(err.http_code).json({ error: err })
-        }
-        return
-    }
-}
-
-// ! BASE URL IS '/GAMES'
+/*
 router.get('/connect', (req, res) => {
     executeSafe(res, async () => {
         const game_id = req.query.id
@@ -47,5 +34,5 @@ router.put('/makemove', (req, res) => {
 
     })
 })
-
+*/
 export default router;

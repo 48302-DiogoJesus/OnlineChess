@@ -1,19 +1,12 @@
 import ERRORS, { ErrorObject } from '../errors/errors'
-import { 
-    createUser,
-    deleteUser,
-    getUserPublic,
-    updateUserPassword,
-    updateUserPublic,
-    userExists,
-    validateCredentials
-} from '../services'
+import Services from '../services'
 
 describe('Services Tests', () => {
 
     const testUsername = '|T-e-s-t|U-s-e-r|'
     const testPassword = 'TestPassword'
     var testToken = ''
+    const testGameID = 'L|O|C|A|L|G|A|M|E|ID'
 
     const expectThrow = async (block: (...args: any[]) => any, ...args: any[]) => {
         try {
@@ -25,80 +18,194 @@ describe('Services Tests', () => {
 
     beforeEach(async () => {
         try {
-            testToken = await createUser(testUsername, testPassword)
+            await Services.deleteGame(testGameID)
+        } catch {}
+        try {
+            await Services.deleteUser(testToken, testUsername)
+        } catch {}
+        try {
+            testToken = await Services.createUser(testUsername, testPassword)
+        } catch {}
+        try {
+            await Services.createGame(testToken, testGameID)
         } catch {}
     })
 
     afterEach(async () => {
         try {
-            await deleteUser(testToken, testUsername)
+            await Services.deleteGame(testGameID)
+        } catch {}
+        try {
+            await Services.deleteUser(testToken, testUsername)
         } catch {}
     })
 
     describe('Users', () => {
+        
+        test('Get all users', async () => {
+            expect((await Services.getUsers(testToken)).length).toBe(1)
+        })
+
         test('User exists unauthenticated', async () => {
-            expect((await expectThrow(userExists, 'INVALID_TOKEN', testUsername))!!.message).toBe(ERRORS.INVALID_TOKEN.message)
+            expect((await expectThrow(Services.userExists, 'INVALID_TOKEN', testUsername))!!.message).toBe(ERRORS.INVALID_TOKEN.message)
         })
 
         test('User exists', async () => {
-            expect(await userExists(testToken, testUsername)).toBeTruthy()
+            expect(await Services.userExists(testToken, testUsername)).toBeTruthy()
         })
 
         test('User does not exist', async () => {
-            expect(await userExists(testToken, 'Some non existing user')).toBeFalsy()
+            expect(await Services.userExists(testToken, 'Some non existing user')).toBeFalsy()
         })
 
         test('Create valid User', async () => {
-            const token2 = await createUser('Test User 2', 'Mypassword2')
+            const token2 = await Services.createUser('Test User 2', 'Mypassword2')
             expect(token2).toBeDefined()
-            await deleteUser(token2, 'Test User 2')
+            await Services.deleteUser(token2, 'Test User 2')
         })
 
         test('Create duplicate User', async () => {
-            const token2 = await createUser('Test User 2', 'Mypassword2')
+            const token2 = await Services.createUser('Test User 2', 'Mypassword2')
             expect(token2).toBeDefined()
-            expect((await expectThrow(createUser, 'Test User 2', 'Mypassword5'))!!.message).toBe(ERRORS.USER_ALREADY_EXISTS.message)
-            await deleteUser(token2, 'Test User 2')
+            expect((await expectThrow(Services.createUser, 'Test User 2', 'Mypassword5'))!!.message).toBe(ERRORS.USER_ALREADY_EXISTS.message)
+            await Services.deleteUser(token2, 'Test User 2')
         })
 
         test('Create user with invalid username 1', async () => {
-            expect((await expectThrow(createUser, 'T-1', 'Mypassword5'))!!.message).toBe(ERRORS.INVALID_USERNAME_LENGTH.message)
+            expect((await expectThrow(Services.createUser, 'T-1', 'Mypassword5'))!!.message).toBe(ERRORS.INVALID_USERNAME_LENGTH.message)
         })
 
         test('Create user with invalid username 2', async () => {
-            expect((await expectThrow(createUser, 'Test-123', 'Myp'))!!.message).toBe(ERRORS.INVALID_PASSWORD_LENGTH.message)
+            expect((await expectThrow(Services.createUser, 'Test-123', 'Myp'))!!.message).toBe(ERRORS.INVALID_PASSWORD_LENGTH.message)
         })
 
         test('Get user rank', async () => {
-            const rank = (await getUserPublic(testToken, testUsername)).rank
+            const rank = (await Services.getUserPublic(testToken, testUsername)).rank
             expect(rank).toBeDefined()
             expect(rank).toBe("0")
         })
 
         test('Validate valid credentials', async () => {
-            expect(await validateCredentials(testUsername, testPassword)).toBeTruthy()
+            expect(await Services.validateCredentials(testUsername, testPassword)).toBeTruthy()
         })
 
         test('Validate invalid credentials', async () => {
-            expect((await expectThrow(validateCredentials, testUsername, 'NewPassword'))!!.message).toBe(ERRORS.WRONG_PASSWORD.message)
+            expect((await expectThrow(Services.validateCredentials, testUsername, 'NewPassword'))!!.message).toBe(ERRORS.WRONG_PASSWORD.message)
         })
 
         test('Validate credentials from unexisting user', async () => {
-            expect((await expectThrow(validateCredentials, "asjhdksdfkksdjhfjksdfh", 'PASSWORD_HERE'))!!.message).toBe(ERRORS.USER_DOES_NOT_EXIST.message)
+            expect((await expectThrow(Services.validateCredentials, "asjhdksdfkksdjhfjksdfh", 'PASSWORD_HERE'))!!.message).toBe(ERRORS.USER_DOES_NOT_EXIST.message)
         })
 
         test('Update user password', async () => {
-            await updateUserPassword(testToken, testUsername, 'NewPassword')
-            expect(await validateCredentials(testUsername, 'NewPassword')).toBeTruthy()
+            await Services.updateUserPassword(testToken, 'NewPassword')
+            expect(await Services.validateCredentials(testUsername, 'NewPassword')).toBeTruthy()
         })
 
         test('Update user public rank', async () => {
-            await updateUserPublic(testToken, testUsername, { rank: 92 })
-            expect((await getUserPublic(testToken, testUsername)).rank).toBe("92")
+            await Services.updateUserPublic(testToken, testUsername, { rank: 92 })
+            expect((await Services.getUserPublic(testToken, testUsername)).rank).toBe("92")
         })
+        
     })
 
     describe('Games', () => {
+        
+        test('Create a public game (another player can join with black pieces)', async () => {
+            await Services.deleteGame(testGameID)
+            await Services.createGame(testToken, testGameID)
+            expect(await Services.gameExists(testToken, testGameID)).toBeTruthy()
+        })
 
+        test('Create a private game where player with black pieces does not exist', async () => {
+            await Services.deleteGame(testGameID)
+            expect((await expectThrow(Services.createGame, testToken, testGameID, "N/A"))!!.message).toBe(ERRORS.USER_DOES_NOT_EXIST.message)
+            expect(await Services.gameExists(testToken, testGameID)).toBeFalsy()
+        })
+        
+        test('Create a private game with 2 players', async () => {
+            const newUserToken = await Services.createUser('test_user', 'test_password')
+            await Services.deleteGame(testGameID)
+            await Services.createGame(testToken, testGameID, 'test_user')
+            expect(await Services.userExists(testToken, 'test_user')).toBeTruthy()
+            expect(await Services.gameExists(testToken, testGameID)).toBeTruthy()
+            const game = await Services.getGame(testToken, testGameID)
+            await Services.deleteUser(newUserToken, 'test_user')
+            expect(game._id).toBe(testGameID)
+            expect(game.player_white).toBe(testUsername)
+            expect(game.player_black).toBe('test_user')
+            expect(game.turn).toBe("w")
+            expect(game.winner).toBeNull()
+        })
+        
+        test('Create game with invalid Game ID', async () => {
+            await Services.deleteGame(testGameID)
+            expect((await expectThrow(Services.createGame, testToken, ""))!!.message).toBe(ERRORS.INVALID_GAMEID_LENGTH.message)
+            expect(await Services.gameExists(testToken, testGameID)).toBeFalsy()
+        })
+        
+        test('Valid is allowed to connect to a game', async () => {
+            expect(await Services.isAllowedToConnectToGame(testToken, testGameID)).toBeTruthy()
+        })
+
+        test('Valid is allowed to connect to a game with player_black=null', async () => {
+            const token2 = await Services.createUser('New User 2', 'mypassword')
+            
+            // Test the game creator as well
+            expect(await Services.isAllowedToConnectToGame(testToken, testGameID)).toBeTruthy()
+            expect(await Services.isAllowedToConnectToGame(token2, testGameID)).toBeTruthy()
+            
+            const token3 = await Services.createUser('New User 3', 'mypassword')
+            expect(await Services.isAllowedToConnectToGame(token3, testGameID)).toBeTruthy()
+            expect(await Services.isAllowedToConnectToGame(testToken, testGameID)).toBeTruthy()
+
+            await Services.deleteUser(token2, 'New User 2')
+            await Services.deleteUser(token3, 'New User 3')
+        })
+
+        test('Valid is allowed to connect to a game with player_black!=null', async () => {
+            const token2 = await Services.createUser('New User 2', 'mypassword')
+            
+            // Test the game creator as well
+            expect(await Services.isAllowedToConnectToGame(testToken, testGameID)).toBeTruthy()
+            expect(await Services.isAllowedToConnectToGame(token2, testGameID)).toBeTruthy()
+            
+            expect(await Services.connectToGame(token2, testGameID)).toBeTruthy()
+            
+            const token3 = await Services.createUser('New User 3', 'mypassword')
+            // Game should already be full
+            expect(await Services.isAllowedToConnectToGame(token3, testGameID)).toBeFalsy()
+            // This is one of the allowed players
+            expect(await Services.isAllowedToConnectToGame(testToken, testGameID)).toBeTruthy()
+            
+            await Services.deleteUser(token2, 'New User 2')
+            await Services.deleteUser(token3, 'New User 3')
+        })
+
+        test('Valid moves on the board', async () => {
+            const token2 = await Services.createUser('New User 2', 'mypassword')
+
+            expect(await Services.connectToGame(token2, testGameID)).toBeTruthy()
+            expect((await Services.getGame(token2, testGameID)).player_white).toBe(testUsername)
+            expect((await Services.getGame(token2, testGameID)).player_black).toBe('New User 2')
+
+            expect((await expectThrow(Services.executeGameMove, token2, testGameID, 'pb2b4'))!!.message).toBe(ERRORS.NOT_YOUR_TURN.message)
+            expect(await Services.executeGameMove(testToken, testGameID, 'pb2b4')).toBeTruthy()
+
+            const updatedGame = await Services.getGame(testToken, testGameID)
+
+            expect(updatedGame.turn).toBe("b")
+            expect(updatedGame.board).toBe("rnbqkbnrpppppppp                 P              P PPPPPPRNBQKBNR")
+
+            expect((await expectThrow(Services.executeGameMove, testToken, testGameID, 'pb2b4'))!!.message).toBe(ERRORS.NOT_YOUR_TURN.message)
+            expect(await Services.executeGameMove(token2, testGameID, 'pb7b6')).toBeTruthy()
+
+            const updatedGame1 = await Services.getGame(testToken, testGameID)
+
+            expect(updatedGame1.turn).toBe("w")
+            expect(updatedGame1.board).toBe("rnbqkbnrp pppppp p               P              P PPPPPPRNBQKBNR")
+
+            await Services.deleteUser(token2, 'New User 2')
+        })
     })
 })

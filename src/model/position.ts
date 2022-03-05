@@ -2,7 +2,7 @@ import {
     BOARD_HEIGHT, 
     BOARD_WIDTH 
 } from './board'
-import ERRORS from './model-errors'
+import ERRORS from '../errors/errors'
 import { charToPiece } from './piece';
 
 export function range(x: number, min: number, max: number) {

@@ -14,9 +14,9 @@ export interface GameObject {
 const Game = new Schema({
   _id: { type: String, required: true },
   player_white: { type: String, required: true },
-  player_black: { type: String, required: true },
+  player_black: { type: String, required: false },
   board: { type: String, required: true },
-  winner: { type: String, required: true },
+  winner: { type: String, required: false },
   turn: { type: String, required: true }
 }, { collection: 'Games' });
 

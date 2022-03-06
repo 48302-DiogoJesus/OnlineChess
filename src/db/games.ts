@@ -6,6 +6,8 @@ function validateGameID(game_id: string) {
     if (!(game_id.length >= 4 && game_id.length <= 20)) {
         throw ERRORS.INVALID_GAMEID_LENGTH
     }
+    if (game_id.includes(' '))
+        throw ERRORS.INVALID_GAMEID_WS
     /*
     if (!/^[a-zA-Z0-9_-]*$/.test(game_id)) {
         throw ERRORS.INVALID_GAMEID_CHARACTERS

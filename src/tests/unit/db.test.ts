@@ -1,5 +1,5 @@
-import ERRORS, { ErrorObject } from '../errors/errors'
-import Services from '../services'
+import ERRORS, { ErrorObject } from '../../errors/errors'
+import Services from '../../services'
 
 describe('Services Tests', () => {
 
@@ -59,16 +59,16 @@ describe('Services Tests', () => {
         })
 
         test('Create valid User', async () => {
-            const token2 = await Services.createUser('Test User 2', 'Mypassword2')
+            const token2 = await Services.createUser('Test_User_2', 'Mypassword2')
             expect(token2).toBeDefined()
-            await Services.deleteUser(token2, 'Test User 2')
+            await Services.deleteUser(token2, 'Test_User_2')
         })
 
         test('Create duplicate User', async () => {
-            const token2 = await Services.createUser('Test User 2', 'Mypassword2')
+            const token2 = await Services.createUser('Test_User_2', 'Mypassword2')
             expect(token2).toBeDefined()
-            expect((await expectThrow(Services.createUser, 'Test User 2', 'Mypassword5'))!!.message).toBe(ERRORS.USER_ALREADY_EXISTS.message)
-            await Services.deleteUser(token2, 'Test User 2')
+            expect((await expectThrow(Services.createUser, 'Test_User_2', 'Mypassword5'))!!.message).toBe(ERRORS.USER_ALREADY_EXISTS.message)
+            await Services.deleteUser(token2, 'Test_User_2')
         })
 
         test('Create user with invalid username 1', async () => {
@@ -149,22 +149,22 @@ describe('Services Tests', () => {
         })
 
         test('Valid is allowed to connect to a game with player_black=null', async () => {
-            const token2 = await Services.createUser('New User 2', 'mypassword')
+            const token2 = await Services.createUser('New_User_2', 'mypassword')
             
             // Test the game creator as well
             expect(await Services.isAllowedToConnectToGame(testToken, testGameID)).toBeTruthy()
             expect(await Services.isAllowedToConnectToGame(token2, testGameID)).toBeTruthy()
             
-            const token3 = await Services.createUser('New User 3', 'mypassword')
+            const token3 = await Services.createUser('New_User_3', 'mypassword')
             expect(await Services.isAllowedToConnectToGame(token3, testGameID)).toBeTruthy()
             expect(await Services.isAllowedToConnectToGame(testToken, testGameID)).toBeTruthy()
 
-            await Services.deleteUser(token2, 'New User 2')
-            await Services.deleteUser(token3, 'New User 3')
+            await Services.deleteUser(token2, 'New_User_2')
+            await Services.deleteUser(token3, 'New_User_3')
         })
 
         test('Valid is allowed to connect to a game with player_black!=null', async () => {
-            const token2 = await Services.createUser('New User 2', 'mypassword')
+            const token2 = await Services.createUser('New_User_2', 'mypassword')
             
             // Test the game creator as well
             expect(await Services.isAllowedToConnectToGame(testToken, testGameID)).toBeTruthy()
@@ -172,22 +172,22 @@ describe('Services Tests', () => {
             
             expect(await Services.connectToGame(token2, testGameID)).toBeTruthy()
             
-            const token3 = await Services.createUser('New User 3', 'mypassword')
+            const token3 = await Services.createUser('New_User_3', 'mypassword')
             // Game should already be full
             expect(await Services.isAllowedToConnectToGame(token3, testGameID)).toBeFalsy()
             // This is one of the allowed players
             expect(await Services.isAllowedToConnectToGame(testToken, testGameID)).toBeTruthy()
             
-            await Services.deleteUser(token2, 'New User 2')
-            await Services.deleteUser(token3, 'New User 3')
+            await Services.deleteUser(token2, 'New_User_2')
+            await Services.deleteUser(token3, 'New_User_3')
         })
 
         test('Valid moves on the board', async () => {
-            const token2 = await Services.createUser('New User 2', 'mypassword')
+            const token2 = await Services.createUser('New_User_2', 'mypassword')
 
             expect(await Services.connectToGame(token2, testGameID)).toBeTruthy()
             expect((await Services.getGame(token2, testGameID)).player_white).toBe(testUsername)
-            expect((await Services.getGame(token2, testGameID)).player_black).toBe('New User 2')
+            expect((await Services.getGame(token2, testGameID)).player_black).toBe('New_User_2')
 
             expect((await expectThrow(Services.executeGameMove, token2, testGameID, 'pb2b4'))!!.message).toBe(ERRORS.NOT_YOUR_TURN.message)
             expect(await Services.executeGameMove(testToken, testGameID, 'pb2b4')).toBeTruthy()
@@ -205,7 +205,7 @@ describe('Services Tests', () => {
             expect(updatedGame1.turn).toBe("w")
             expect(updatedGame1.board).toBe("rnbqkbnrp pppppp p               P              P PPPPPPRNBQKBNR")
 
-            await Services.deleteUser(token2, 'New User 2')
+            await Services.deleteUser(token2, 'New_User_2')
         })
     })
 })

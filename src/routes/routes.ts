@@ -3,6 +3,7 @@ import Express from 'express'
 import GamesRoutes from './games'
 import AuthRoutes from './auth'
 import UserRoutes from './users'
+import FriendRoutes from './friends'
 
 import passport from 'passport'
 const cors = require('cors')
@@ -25,6 +26,7 @@ app.use(Express.urlencoded({ extended: true }))
 app.use(Express.json());
 
 app.use('/auth' , AuthRoutes)
+app.use('/users/friends', FriendRoutes)
 app.use('/users', UserRoutes)
 app.use('/games', GamesRoutes)
 

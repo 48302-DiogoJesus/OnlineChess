@@ -10,6 +10,8 @@ export function validateUserName(username: string) {
     if (!(username.length >= 5 && username.length <= 20)) {
         throw ERRORS.INVALID_USERNAME_LENGTH
     }
+    if (username.includes(' '))
+        throw ERRORS.INVALID_USERNAME_WS
     /*
     if (!(/^[a-zA-Z0-9]+$/.test(username))) {
         throw ERRORS.INVALID_USERNAME_CHARACTERS
@@ -21,6 +23,8 @@ export function validatePassword(password: string) {
     if (!(password.length >= 5 && password.length <= 20)) {
         throw ERRORS.INVALID_PASSWORD_LENGTH
     }
+    if (password.includes(' '))
+        throw ERRORS.INVALID_PASSWORD_WS
     /*
     if (!/[a-zA-Z0-9_-]* /.test(password)) {
         throw ERRORS.INVALID_PASSWORD_CHARACTERS

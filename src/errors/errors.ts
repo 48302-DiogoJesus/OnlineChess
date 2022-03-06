@@ -16,9 +16,9 @@ const GAME_ERRORS = {
         http_code: 400,
         message: "The GameID should have between 5 and 20 characters"
     },
-    INVALID_GAMEID_CHARACTERS: { 
+    INVALID_GAMEID_WS: { 
         http_code: 400,
-        message: "The GameID should contain alphanumeric characters, '_'(underline) and '-'(dash)"
+        message: "The GameID should not contain whitespaces"
     },
     NOT_AUTHORIZED_TO_CONNECT: { 
         http_code: 403,
@@ -40,12 +40,12 @@ const USER_ERRORS = {
         http_code: 400,
         message: 'Username should have between 5 and 25 characters'
     },
-    INVALID_USERNAME_CHARACTERS: { 
+    INVALID_USERNAME_WS: { 
         http_code: 400,
-        message: "The Username should contain alphanumeric characters"
+        message: "The Username should not contain whitespaces"
     },
     USER_DOES_NOT_EXIST: {
-        http_code: 400,
+        http_code: 404,
         message: "User does not exist"
     },
     USER_ALREADY_EXISTS: {
@@ -56,9 +56,9 @@ const USER_ERRORS = {
         http_code: 400,
         message: 'Password should have between 5 and 25 characters'
     },
-    INVALID_PASSWORD_CHARACTERS: { 
+    INVALID_PASSWORD_WS: { 
         http_code: 400,
-        message: "The Password should contain alphanumeric characters"
+        message: "The Password should not contain whitespaces"
     },
     INVALID_PASSWORD_UPPERCASE: { 
         http_code: 400,
@@ -75,6 +75,14 @@ const USER_ERRORS = {
     NOT_AUTHORIZED: {
         http_code: 403,
         message: "Forbidden Action"
+    },
+    USER_ALREADY_HAS_THAT_FRIEND: {
+        http_code: 400,
+        message: "You are already friends with that user"
+    },
+    USER_DOES_NOT_HAVE_THAT_FRIEND: {
+        http_code: 404,
+        message: "You are not friends with that user"
     }
 }
 

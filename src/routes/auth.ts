@@ -1,8 +1,7 @@
-import { Router, Response, Request} from "express";
+import { Router, Response, Request } from "express";
 import ERRORS from '../errors/errors'
 import { executeSafe, getToken } from "./common";
 import Services from "../services";
-import app from "./routes";
 
 const router = Router()
 
@@ -42,7 +41,7 @@ router.get('/logout', (req: any, res: Response) => {
 })
 
 // Change user password
-app.put('/', (req, res) => {
+router.put('/', (req, res) => {
     executeSafe(res, async () => {
         const token = getToken(req)
 

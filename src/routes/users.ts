@@ -46,7 +46,7 @@ router.post('/', (req, res) => {
             token: userToken
         }, (err) => {
             if (err) throw ERRORS.UNKNOWN_ERROR(500, err)
-            res.status(200).json({
+            res.status(201).json({
                 token: userToken
             })
         })

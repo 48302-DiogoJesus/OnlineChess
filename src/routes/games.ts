@@ -1,38 +1,77 @@
 import { Router, Response, Request} from "express";
 import ERRORS, { ErrorObject } from '../errors/errors'
-import { createGame, gameExists } from "../services";
+import Services from "../services";
 import { executeSafe, getToken } from "./common";
 
 const router = Router()
-/*
-router.get('/connect', (req, res) => {
+
+// Create a new game
+router.post('/', (req, res) => {
     executeSafe(res, async () => {
-        const game_id = req.query.id
+        const token = getToken(req)
 
-        if (game_id === undefined)
-            throw ERRORS.BAD_REQUEST('Game ID is required!')
+        const game_id = req.body.id
 
-        if (!await gameExists(game_id.toString())) throw ERRORS.GAME_DOES_NOT_EXIST
-        
-        // Connect to game is setting black player to THIS(cookie || authorization header) username
+        if (game_id === undefined) throw ERRORS.BAD_REQUEST('Game ID not provided!')
+
+        const initialGameObject = await Services.createGame(token, game_id)
+
+        res.status(201).json({
+            data: initialGameObject
+        })
     })
 })
 
-router.put('/makemove', (req, res) => {
+// Get the updated data for a specific game 
+router.get('/', (req, res) => {
     executeSafe(res, async () => {
+        const token = getToken(req)
+
+        const game_id = req.query.id
+
+        if (game_id === undefined) throw ERRORS.BAD_REQUEST('Game ID not provided!')
+
+        const gameObject = await Services.getGame(token, game_id.toString())
+    
+        res.status(200).json({
+            data: gameObject
+        })
+    })
+})
+
+// Connect to a game
+router.get('/connect', (req, res) => {
+    executeSafe(res, async () => {
+        const token = getToken(req)
+
+        const game_id = req.query.id
+
+        if (game_id === undefined) throw ERRORS.BAD_REQUEST('Game ID not provided!')
+
+        const gameObject = await Services.connectToGame(token, game_id.toString())
+
+        res.status(200).json({
+            data: gameObject
+        })
+    })
+})
+
+router.get('/makemove', (req, res) => {
+    executeSafe(res, async () => {
+        const token = getToken(req)
+
         const game_id = req.query.id
         const move = req.query.move
 
-        if (game_id === undefined)
-            throw ERRORS.BAD_REQUEST('Game ID is required!')
-        if (move === undefined)
-            throw ERRORS.BAD_REQUEST('Move is required!')
+        if (game_id === undefined) throw ERRORS.BAD_REQUEST('Game ID not provided!')
+        if (move === undefined) throw ERRORS.BAD_REQUEST('Move not provided!')
 
-        if (!await gameExists(game_id.toString())) throw ERRORS.GAME_DOES_NOT_EXIST
+        const updatedGame = await Services.executeGameMove(token, game_id.toString(), move.toString()) 
         
-        // Attempt move on local board and if successfull return true and update remote game else return false
-
+        res.status(200).json({
+            data: updatedGame
+        })
     })
 })
-*/
+
 export default router;

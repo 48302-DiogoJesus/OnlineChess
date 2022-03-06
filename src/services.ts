@@ -1,5 +1,7 @@
 import Games from './db/games'
 import Users from './db/users'
+import UserFriends from './db/friends'
+
 import { BoardObject as Board, stringToBoard } from './model/board'
 import ERRORS from './errors/errors'
 import { UserPublicObject } from './db/schemas/userPublic'
@@ -7,14 +9,23 @@ import { getOpponent, PieceColor } from './model/piece'
 import { GameObject } from './db/schemas/game'
 
 const bundled = {
-    gameExists, createGame, getGame, getAllGames, isAllowedToConnectToGame, connectToGame, executeGameMove, deleteGame,
-    getUsers, userExists, createUser, deleteUser, getUserPublic, updateUserPassword, updateUserPublic, validateCredentials
+    gameExists, createGame, getGame, getGames, getGamesById, isAllowedToConnectToGame, connectToGame, executeGameMove, deleteGame,
+    getUsers, userExists, createUser, deleteUser, getUserPublic, updateUserPassword, updateUserPublic, validateCredentials,
+    getFriends, addFriend, removeFriend, hasFriend
 }
 export default bundled
 
-export async function getAllGames(token: string) {
+
+/* --------------------------- GAMES --------------------------- */
+
+export async function getGames(token: string, limit: boolean = false): Promise<GameObject[]> {
     await Users.tokenToUsername(token)
-    return Games.getGames()
+    return Games.getGames(limit)
+}
+
+export async function getGamesById(token: string, game_id: string) {
+    const allGames = await getGames(token)
+    return allGames.filter(game => game._id.includes(game_id))
 }
 
 // Any player can connect as "player_black" later if player_black = null
@@ -37,8 +48,8 @@ export async function createGame(token: string, game_id: string, player_black: s
         turn: defaultBoard.turn,
         winner: defaultBoard.winner
     }
-    // Later do token and authorization validations here ! dont forget AWAIT THEN!
-    return Games.createGame(gameObject)
+    await Games.createGame(gameObject)
+    return Games.getGame(game_id)
 }
 
 export async function getGame(token: string, game_id: string) {
@@ -87,7 +98,7 @@ export async function connectToGame(token: string, game_id: string): Promise<Gam
     return currentGameObject
 }
 
-export async function executeGameMove(token: string, game_id: string, move: string): Promise<boolean> {
+export async function executeGameMove(token: string, game_id: string, move: string): Promise<GameObject> {
     const username = await Users.tokenToUsername(token)
 
     if (!(await Games.gameExists(game_id))) throw ERRORS.GAME_DOES_NOT_EXIST
@@ -101,7 +112,7 @@ export async function executeGameMove(token: string, game_id: string, move: stri
     // If remote game as string is invalid just delete it
     if (testBoard === null) {
         await Games.deleteGame(game_id)
-        return false
+        throw ERRORS.UNKNOWN_ERROR(500, 'Could not parse remote board')
     }
 
     const playerPieces = username === gameObject.player_white ? PieceColor.WHITE : PieceColor.BLACK
@@ -119,7 +130,8 @@ export async function executeGameMove(token: string, game_id: string, move: stri
             turn: getOpponent(playerPieces)
         }
     )
-    return true
+    // Return the updated game
+    return Games.getGame(game_id)
 } 
 
 export async function gameExists(token: string, game_id: string): Promise<boolean> {
@@ -161,15 +173,13 @@ export async function deleteUser(token: string, user_to_delete: string) {
     if (username !== user_to_delete)
         throw ERRORS.NOT_AUTHORIZED
 
-    if (!(await Users.userExists(username)))
-        throw ERRORS.USER_DOES_NOT_EXIST
-
     return Users.deleteUser(username)
 }
 
 export async function getUserPublic(token: string, username: string) {
+    await Users.tokenToUsername(token)
 
-    if (!(await Users.userExists(username,)))
+    if (!(await Users.userExists(username)))
         throw ERRORS.USER_DOES_NOT_EXIST
 
     const publicUserData = await Users.getUserPublic(username)
@@ -207,4 +217,46 @@ export async function validateCredentials(username: string, password: string) {
         throw ERRORS.USER_DOES_NOT_EXIST
     
     return Users.validateCredentials(username, password)
+}
+
+/* --------------------------- FRIENDS --------------------------- */
+
+export async function getFriends(token: string, username: string | null =  null): Promise<string[]> {
+    const authedUser = await Users.tokenToUsername(token)
+    
+    var usertosearch = username !== null ? username : authedUser 
+
+    if (usertosearch !== authedUser) {
+        if (!(await Users.userExists(usertosearch)))
+            throw ERRORS.USER_DOES_NOT_EXIST
+    }
+
+    return UserFriends.getFriends(usertosearch)
+}
+
+export async function addFriend(token: string, friend_name: string): Promise<void> {
+    const username = await Users.tokenToUsername(token)
+    
+    if (!(await Users.userExists(friend_name)))
+        throw ERRORS.USER_DOES_NOT_EXIST
+
+    if (await UserFriends.hasFriend(token, friend_name))
+        throw ERRORS.USER_ALREADY_HAS_THAT_FRIEND
+
+    return UserFriends.addFriend(username, friend_name)
+}
+
+export async function removeFriend(token: string, friend_name: string): Promise<void> {
+    const username = await Users.tokenToUsername(token)
+
+    if (!(await UserFriends.hasFriend(token, friend_name)))
+        throw ERRORS.USER_ALREADY_HAS_THAT_FRIEND
+
+    // Friend does not need to exist to be removed on purpose
+    return UserFriends.removeFriend(username, friend_name)
+}
+
+export async function hasFriend(token: string, friend_name: string): Promise<boolean> {
+    const username = await Users.tokenToUsername(token)
+    return UserFriends.hasFriend(username, friend_name)
 }

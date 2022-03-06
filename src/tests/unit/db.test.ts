@@ -107,6 +107,81 @@ describe('Services Tests', () => {
             expect((await Services.getUserPublic(testToken, testUsername)).rank).toBe("92")
         })
         
+        describe('User Friends', () => { 
+            
+            test('Get friends from unexisting user', async () => {
+                expect((await expectThrow(Services.getFriends, testToken, "Other user"))).toEqual(ERRORS.USER_DOES_NOT_EXIST) 
+            })
+
+            test('Get friends from himself', async () => {
+                const friends = await Services.getFriends(testToken, testUsername)
+                expect(friends.length).toBe(0)
+            })
+            
+            test('Get friends from other user', async () => {
+                const token2 = await Services.createUser('Test_User_2', 'Test_Password')
+
+                const friends = await Services.getFriends(testToken, 'Test_User_2')
+                expect(friends.length).toBe(0)
+
+                await Services.deleteUser(token2, 'Test_User_2')
+            })
+            
+            test('Add unexisting friend to user', async () => {
+                expect((await expectThrow(Services.addFriend, testToken, "Other user"))).toEqual(ERRORS.USER_DOES_NOT_EXIST) 
+            })
+
+            test('Add friend to user', async () => {
+                const token2 = await Services.createUser('Test_User_2', 'Test_Password')
+
+                await Services.addFriend(testToken, 'Test_User_2')
+
+                const friends = await Services.getFriends(testToken, testUsername)
+                expect(friends.length).toBe(1)
+                expect(friends[0]).toBe('Test_User_2')
+
+                await Services.deleteUser(token2, 'Test_User_2')
+            })
+
+            test('Add duplicate friend to user', async () => {
+                const token2 = await Services.createUser('Test_User_2', 'Test_Password')
+
+                await Services.addFriend(testToken, 'Test_User_2')
+
+                const friends = await Services.getFriends(testToken, testUsername)
+                expect(friends.length).toBe(1)
+                expect(friends[0]).toBe('Test_User_2')
+
+                expect((await expectThrow(Services.addFriend, testToken, 'Test_User_2'))).toEqual(ERRORS.USER_ALREADY_HAS_THAT_FRIEND)
+
+                const friends1 = await Services.getFriends(testToken, testUsername)
+                expect(friends1.length).toBe(1)
+                expect(friends1[0]).toBe('Test_User_2')
+
+                await Services.deleteUser(token2, 'Test_User_2')
+            })
+            
+            test('Remove undexisting friend', async () => {
+                expect((await expectThrow(Services.removeFriend, testToken, 'Test_User_2'))).toEqual(ERRORS.USER_DOES_NOT_HAVE_THAT_FRIEND)
+            })
+            
+            test('Valid remove friend', async () => {
+                const token2 = await Services.createUser('Test_User_2', 'Test_Password')
+
+                await Services.addFriend(testToken, 'Test_User_2')
+
+                const friends = await Services.getFriends(testToken, testUsername)
+                expect(friends.length).toBe(1)
+                expect(friends[0]).toBe('Test_User_2')
+
+                await Services.removeFriend(testToken, 'Test_User_2')
+
+                const friends1 = await Services.getFriends(testToken, testUsername)
+                expect(friends1.length).toBe(0)
+
+                await Services.deleteUser(token2, 'Test_User_2')
+            })
+        })
     })
 
     describe('Games', () => {

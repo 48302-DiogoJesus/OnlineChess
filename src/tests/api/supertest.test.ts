@@ -32,6 +32,7 @@ describe('API Tests', () => {
     })
     
     describe('Users', () => {
+        
         it('Get user data without being authenticated', async () => {
             const response = await supertest(ExpressApp)
             .get(resources.users + '/unexisting_username')
@@ -142,6 +143,124 @@ describe('API Tests', () => {
 
             // Token should be invalid since it was deleted int he previous operation
             expect(response1.status).toBe(401)
+        })
+        
+        describe('Friends', () => {
+            
+            test('Get friends from unexisting user', async () => {
+                const response  = await supertest(ExpressApp)
+                .get(resources.users + `/Test_user_2/friends`)
+                .set('Authorization', calcAuthorizationHeader())
+
+                expect(response.status).toBe(404)
+            })
+            
+            test('Get friends from himself', async () => {
+                const response  = await supertest(ExpressApp)
+                .get(resources.users + `/${testUsername}/friends`)
+                .set('Authorization', calcAuthorizationHeader())
+
+                expect(response.status).toBe(200)
+                expect(response.body.data.length).toBe(0)
+            })
+
+            test('Get friends from other user', async () => {
+                const token2 = await Services.createUser('Test_User_2', 'Test_Password')
+
+                const response  = await supertest(ExpressApp)
+                .get(resources.users + `/Test_User_2/friends`)
+                .set('Authorization', calcAuthorizationHeader())
+
+                expect(response.status).toBe(200)
+                expect(response.body.data.length).toBe(0)
+
+                await Services.deleteUser(token2, 'Test_User_2')
+            })
+            
+            test('Add unexisting friend to user', async () => {
+                const response  = await supertest(ExpressApp)
+                .put(resources.users + `/friends`)
+                .set('Authorization', calcAuthorizationHeader())
+                .send({
+                    'friend': 'UNEXISTING_USER'
+                })
+
+                expect(response.status).toBe(404)
+            })
+            
+            test('Add friend to user', async () => {
+                const token2 = await Services.createUser('Test_User_2', 'Test_Password')
+
+                const response  = await supertest(ExpressApp)
+                .put(resources.users + `/friends`)
+                .set('Authorization', calcAuthorizationHeader())
+                .send({
+                    'friend': 'Test_User_2'
+                })
+
+                expect(response.status).toBe(200)
+
+                const getFriends = await supertest(ExpressApp)
+                .get(resources.users + `/${testUsername}/friends`)
+                .set('Authorization', 'Bearer ' + token2)
+                expect(getFriends.status).toBe(200)
+                expect(getFriends.body.data.length).toBe(1)
+                expect(getFriends.body.data[0]).toBe('Test_User_2')
+
+                await Services.deleteUser(token2, 'Test_User_2')
+            })
+
+            test('Add duplicate friend to user', async () => {
+                const token2 = await Services.createUser('Test_User_2', 'Test_Password')
+
+                const response = await supertest(ExpressApp)
+                .put(resources.users + `/friends`)
+                .set('Authorization', calcAuthorizationHeader())
+                .send({
+                    'friend': 'Test_User_2'
+                })
+
+                expect(response.status).toBe(200)
+
+                const response1 = await supertest(ExpressApp)
+                .put(resources.users + `/friends`)
+                .set('Authorization', calcAuthorizationHeader())
+                .send({
+                    'friend': 'Test_User_2'
+                })
+
+                expect(response1.status).toBe(409)
+
+                await Services.deleteUser(token2, 'Test_User_2')
+            })
+
+            test('Remove unexisting friend', async () => {
+                const response = await supertest(ExpressApp)
+                .delete(resources.users + `/friends/Test_User_2`)
+                .set('Authorization', calcAuthorizationHeader())
+
+                expect(response.status).toBe(404)
+            })
+
+            test('Valid remove friend', async () => {
+                const token2 = await Services.createUser('Test_User_2', 'Test_Password')
+
+                const response = await supertest(ExpressApp)
+                .put(resources.users + `/friends`)
+                .set('Authorization', calcAuthorizationHeader())
+                .send({
+                    'friend': 'Test_User_2'
+                })
+                expect(response.status).toBe(200)
+
+                const response1 = await supertest(ExpressApp)
+                .delete(resources.users + `/friends/Test_User_2`)
+                .set('Authorization', calcAuthorizationHeader())
+
+                expect(response1.status).toBe(200)
+
+                await Services.deleteUser(token2, 'Test_User_2')
+            })
         })
     })
 

@@ -5,12 +5,12 @@ import Services from "../services";
 
 const router = Router()
 
-// Get friends list
-router.get('/', (req, res) => {
+// Get friends list for any user
+router.get('/:username/friends', (req, res) => {
     executeSafe(res, async () => {
         const token = getToken(req)
 
-        const friendsList = await Services.getFriends(token)
+        const friendsList = await Services.getFriends(token, req.params.username)
 
         res.status(200).json({
             data: friendsList
@@ -19,7 +19,7 @@ router.get('/', (req, res) => {
 })
 
 // Add friend
-router.put('/', (req, res) => {
+router.put('/friends', (req, res) => {
     executeSafe(res, async () => {
         const token = getToken(req)
 
@@ -34,7 +34,7 @@ router.put('/', (req, res) => {
 })
 
 // Remove a friend
-router.delete('/:friend', (req, res) => {
+router.delete('/friends/:friend', (req, res) => {
     executeSafe(res, async () => {
         const token = getToken(req)
 
@@ -49,7 +49,7 @@ router.delete('/:friend', (req, res) => {
 })
 
 // Has friend ?
-router.get('/:friend', (req, res) => {
+router.get('/:username/friends/:friend', (req, res) => {
     executeSafe(res, async () => {
         const token = getToken(req)
 

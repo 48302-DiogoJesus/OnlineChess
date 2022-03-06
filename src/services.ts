@@ -240,7 +240,7 @@ export async function addFriend(token: string, friend_name: string): Promise<voi
     if (!(await Users.userExists(friend_name)))
         throw ERRORS.USER_DOES_NOT_EXIST
 
-    if (await UserFriends.hasFriend(token, friend_name))
+    if ((await UserFriends.hasFriend(username, friend_name)) || username === friend_name)
         throw ERRORS.USER_ALREADY_HAS_THAT_FRIEND
 
     return UserFriends.addFriend(username, friend_name)
@@ -249,8 +249,8 @@ export async function addFriend(token: string, friend_name: string): Promise<voi
 export async function removeFriend(token: string, friend_name: string): Promise<void> {
     const username = await Users.tokenToUsername(token)
 
-    if (!(await UserFriends.hasFriend(token, friend_name)))
-        throw ERRORS.USER_ALREADY_HAS_THAT_FRIEND
+    if (!(await UserFriends.hasFriend(username, friend_name)))
+        throw ERRORS.USER_DOES_NOT_HAVE_THAT_FRIEND
 
     // Friend does not need to exist to be removed on purpose
     return UserFriends.removeFriend(username, friend_name)

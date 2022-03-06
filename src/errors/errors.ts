@@ -77,7 +77,7 @@ const USER_ERRORS = {
         message: "Forbidden Action"
     },
     USER_ALREADY_HAS_THAT_FRIEND: {
-        http_code: 400,
+        http_code: 409,
         message: "You are already friends with that user"
     },
     USER_DOES_NOT_HAVE_THAT_FRIEND: {

@@ -2,8 +2,11 @@ import { Router, Response, Request} from "express";
 import ERRORS from '../errors/errors'
 import { executeSafe, getToken } from "./common";
 import Services from "../services";
+import FriendRoutes from './friends'
 
 const router = Router()
+
+router.use(FriendRoutes)
 
 // Get a user public data
 router.get('/:username', (req, res) => {

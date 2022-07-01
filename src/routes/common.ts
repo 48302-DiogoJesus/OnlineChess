@@ -1,7 +1,7 @@
-import { Response, Request} from 'express'
+import { Response, Request } from 'express'
 
 /* -------------------------------- AUX FUNCTIONS -------------------------------- */
-export async function executeSafe(res : Response, block: (...args: any[]) => any) {
+export async function executeSafe(res: Response, block: (...args: any[]) => any) {
     try {
         await block()
     } catch (err: any) {
@@ -45,7 +45,7 @@ function getHeaderToken(req: Request) {
     const auth = req.header('Authorization');
     if (auth) {
         const authData = auth.trim();
-        if (authData.substr(0,6).toLowerCase() === 'bearer') {
+        if (authData.substr(0, 6).toLowerCase() === 'bearer') {
             return authData.replace(/^bearer\s+/i, '');
         }
     }

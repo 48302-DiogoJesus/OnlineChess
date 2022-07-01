@@ -8,12 +8,19 @@ import passport from 'passport'
 const cors = require('cors')
 const session = require('express-session')
 
+
 passport.serializeUser((userInfo: any, done) => { done(null, userInfo) })
 passport.deserializeUser((userInfo: any, done) => { done(null, userInfo) })
 
 const app = Express()
 
-app.use(cors())
+app.use((req, res, next) => {
+    res.set('Access-Control-Allow-Credentials', 'true')
+    next()
+})
+app.use(cors({
+    origin: "http://localhost:9000"
+}))
 app.use(session({
     secret: 'borga',
     resave: false,
@@ -24,7 +31,7 @@ app.use(passport.session())
 app.use(Express.urlencoded({ extended: true }))
 app.use(Express.json());
 
-app.use('/auth' , AuthRoutes)
+app.use('/auth', AuthRoutes)
 app.use('/users', UserRoutes)
 app.use('/games', GamesRoutes)
 

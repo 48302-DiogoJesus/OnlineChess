@@ -28,9 +28,10 @@ router.post('/', (req, res) => {
 router.get('/logout', (req: any, res: Response) => {
     try {
         req.logout()
+        res.clearCookie('connect.sid');
         req.session.destroy(function (err: any) {
             if (!err) {
-                res.clearCookie('connect.sid', {path: '/'});
+                res.clearCookie('connect.sid', { path: '/' });
             } else {
                 throw ERRORS.UNKNOWN_ERROR(500, err)
             }

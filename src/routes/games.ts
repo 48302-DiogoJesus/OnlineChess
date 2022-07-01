@@ -1,4 +1,4 @@
-import { Router, Response, Request} from "express";
+import { Router, Response, Request } from "express";
 import ERRORS, { ErrorObject } from '../errors/errors'
 import Services from "../services";
 import { executeSafe, getToken } from "./common";
@@ -32,7 +32,7 @@ router.get('/', (req, res) => {
         if (game_id === undefined) throw ERRORS.BAD_REQUEST('Game ID not provided!')
 
         const gameObject = await Services.getGame(token, game_id.toString())
-    
+
         res.status(200).json({
             data: gameObject
         })
@@ -66,8 +66,8 @@ router.get('/makemove', (req, res) => {
         if (game_id === undefined) throw ERRORS.BAD_REQUEST('Game ID not provided!')
         if (move === undefined) throw ERRORS.BAD_REQUEST('Move not provided!')
 
-        const updatedGame = await Services.executeGameMove(token, game_id.toString(), move.toString()) 
-        
+        const updatedGame = await Services.executeGameMove(token, game_id.toString(), move.toString())
+
         res.status(200).json({
             data: updatedGame
         })

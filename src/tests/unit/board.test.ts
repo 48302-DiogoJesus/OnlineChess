@@ -3,7 +3,7 @@ import ERRORS, { ErrorObject } from '../../errors/errors'
 import { Bishop, charToPiece, King, Knight, MoveState, Pawn, Piece, PieceColor, pieceToChar, Queen, Rook } from "../../model/piece"
 import { BoardObject, stringToBoard } from "../../model/board"
 
-describe('Board Game Tests',() => {
+describe('Board Game Tests', () => {
 
     const expectThrow = ((block: (...args: any[]) => any, ...args: any[]) => {
         try {
@@ -20,7 +20,7 @@ describe('Board Game Tests',() => {
     beforeEach(() => {
 
     })
-    
+
     describe('Position Tests', () => {
         test('Valid String to Position 1', () => {
             const position = stringToPosition("a2")
@@ -87,7 +87,7 @@ describe('Board Game Tests',() => {
     })
 
     describe('Piece Tests', () => {
-        
+
         test('Init King piece', () => {
             const king = new King(PieceColor.BLACK)
             expect(king.color).toBe(PieceColor.BLACK)
@@ -105,7 +105,7 @@ describe('Board Game Tests',() => {
             expect(bishop.color).toBe(PieceColor.BLACK)
             expect(bishop.toString()).toBe('b')
         })
-        
+
         test('Init Queen piece', () => {
             const queen = new Queen(PieceColor.WHITE)
             expect(queen.color).toBe(PieceColor.WHITE)
@@ -147,11 +147,11 @@ describe('Board Game Tests',() => {
             expect(pieceToChar(new Bishop(PieceColor.BLACK))).toBe('b')
             expect(pieceToChar(new Rook(PieceColor.WHITE))).toBe('R')
         })
-        
+
     })
 
     describe('Board Tests', () => {
-        
+
         test('Init Default Board', () => {
             const board = new BoardObject()
             expect(board.board.length).toBe(8)
@@ -177,11 +177,11 @@ describe('Board Game Tests',() => {
             board.setPieceAt(stringToPosition("a1"), new Pawn(PieceColor.BLACK))
             expect(board.toString()).toBe('rnbqkbnrpppppppP                                PPPPPPPPpNBQKBNR')
         })
-        
+
     })
 
     describe('Board Moves Tests', () => {
-        
+
         test('Make initial pawn move 2 steps', () => {
             const board = new BoardObject()
             const testMove = "pb2b4"
@@ -189,22 +189,22 @@ describe('Board Game Tests',() => {
             expect(board.getPieceAt(stringToPosition("b2"))!!.checkMove(stringToMove("pb2b4"), board)).toBe(MoveState.OK)
             expect(board.getPieceAt(stringToPosition("b2"))!!.checkMove(stringToMove("pb2b3"), board)).toBe(MoveState.OK)
             expect(board.getPieceAt(stringToPosition("b2"))!!.checkMove(stringToMove("pb2a1"), board)).toBe(MoveState.PATH_INVALID)
-            
+
             board.makeMove(testMove)
 
             expect(board.toString()).toBe('rnbqkbnrpppppppp                 P              P PPPPPPRNBQKBNR')
         })
-        
+
         test('Make knight move', () => {
             const board = new BoardObject()
-            
+
             expect(board.getPieceAt(stringToPosition("b1"))?.checkMove(stringToMove("nb1a3"), board)).toBe(MoveState.OK)
-            
+
             board.makeMove("nb1a3")
 
             expect(board.getPieceAt(stringToPosition("a3"))?.toString()).toBe((new Knight(PieceColor.WHITE).toString()))
         })
-        
+
         test('Test king in check', () => {
             const board = new BoardObject()
 
@@ -215,7 +215,7 @@ describe('Board Game Tests',() => {
             expect(board.turn).toBe(PieceColor.BLACK)
             expect(board.isInCheck()).toBe(true)
         })
-        
+
         test('Test king in checkmate', () => {
             const board = new BoardObject()
 
@@ -227,7 +227,7 @@ describe('Board Game Tests',() => {
             expect(board.turn).toBe(PieceColor.BLACK)
             expect(board.isInCheckMate()).toBe(true)
         })
-        
+
         test('Test eating king', () => {
             const board = new BoardObject()
 
@@ -240,7 +240,7 @@ describe('Board Game Tests',() => {
             // Doesnt matter if is valid or not
             expect(expectThrow(board.makeMove, "pb2b4")!!.message).toBe(ERRORS.ALREADY_OVER.message)
         })
-        
+
 
         test('Test promotion', () => {
             const board = new BoardObject()
@@ -261,7 +261,7 @@ describe('Board Game Tests',() => {
             board.makeMove("ke1f2")
             // Doesnt matter if is valid or not
             expect(board.getPieceAt(stringToPosition("f2"))!!.toString()).toBe("K")
-            
+
             expect(board.findKingPosition()!!.toString()).toBe(stringToPosition("e8").toString())
 
             board.turn = PieceColor.WHITE

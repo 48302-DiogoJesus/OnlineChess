@@ -1,5 +1,5 @@
 export interface ErrorObject {
-    code: number,
+    http_code: number,
     message: string
 }
 
@@ -16,11 +16,11 @@ const GAME_ERRORS = {
         http_code: 400,
         message: "The GameID should have between 5 and 20 characters"
     },
-    INVALID_GAMEID_WS: { 
+    INVALID_GAMEID_WS: {
         http_code: 400,
         message: "The GameID should not contain whitespaces"
     },
-    NOT_AUTHORIZED_TO_CONNECT: { 
+    NOT_AUTHORIZED_TO_CONNECT: {
         http_code: 403,
         message: 'You are not allowed to connect to this game'
     }
@@ -36,11 +36,11 @@ const API_ERRORS = {
 }
 
 const USER_ERRORS = {
-    INVALID_USERNAME_LENGTH: { 
+    INVALID_USERNAME_LENGTH: {
         http_code: 400,
         message: 'Username should have between 5 and 25 characters'
     },
-    INVALID_USERNAME_WS: { 
+    INVALID_USERNAME_WS: {
         http_code: 400,
         message: "The Username should not contain whitespaces"
     },
@@ -52,19 +52,19 @@ const USER_ERRORS = {
         http_code: 409,
         message: "User already exists"
     },
-    INVALID_PASSWORD_LENGTH: { 
+    INVALID_PASSWORD_LENGTH: {
         http_code: 400,
         message: 'Password should have between 5 and 25 characters'
     },
-    INVALID_PASSWORD_WS: { 
+    INVALID_PASSWORD_WS: {
         http_code: 400,
         message: "The Password should not contain whitespaces"
     },
-    INVALID_PASSWORD_UPPERCASE: { 
+    INVALID_PASSWORD_UPPERCASE: {
         http_code: 400,
         message: "The Password should contain at least 1 uppercase character"
     },
-    WRONG_PASSWORD: { 
+    WRONG_PASSWORD: {
         http_code: 400,
         message: "Wrong password for that username"
     },

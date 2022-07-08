@@ -1,4 +1,5 @@
 import { Router, Response, Request } from "express";
+import { GameObject } from "../db/schemas/game";
 import ERRORS, { ErrorObject } from '../errors/errors'
 import Services from "../services";
 import { executeSafe, getToken } from "./common";
@@ -14,7 +15,7 @@ router.post('/', (req, res) => {
 
         if (game_id === undefined) throw ERRORS.BAD_REQUEST('Game ID not provided!')
 
-        const initialGameObject = await Services.createGame(token, game_id)
+        const initialGameObject: GameObject = await Services.createGame(token, game_id)
 
         res.status(201).json({
             data: initialGameObject

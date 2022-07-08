@@ -29,23 +29,29 @@ export async function getGamesById(token: string, game_id: string) {
 }
 
 // Any player can connect as "player_black" later if player_black = null
-export async function createGame(token: string, game_id: string, player_black: string | null = null) {
+export async function createGame(token: string, game_id: string, player2: string | null = null) {
     // Throws if not authenticated
     const username = await Users.tokenToUsername(token)
 
     if (await Games.gameExists(game_id)) throw ERRORS.GAME_ALREADY_EXISTS
-    
-    if (player_black !== null && !(await Users.userExists(player_black)))
+
+    // If player2 is passed validate it exists
+    if (player2 !== null && !(await Users.userExists(player2)))
         throw ERRORS.USER_DOES_NOT_EXIST
 
-    // Build Remote Game Object
+    // Build Remote Board Object
     const defaultBoard = new Board()
+    // Build a Game
     const gameObject = {
         _id: game_id,
-        player_white: username,
-        player_black: player_black,   // Could be null or an actual username
-        board: defaultBoard.toString(),
+
+        player1: username,
+        player2: player2,   // Could be null or an actual username
+
         turn: defaultBoard.turn,
+
+        board: defaultBoard.toString(),
+
         winner: defaultBoard.winner
     }
     await Games.createGame(gameObject)
@@ -69,8 +75,8 @@ export async function isAllowedToConnectToGame(token: string, game_id: string): 
     const currentGameObject = await Games.getGame(game_id)
 
     // If player2(black) has already connected make sure the player whos connecting is allowed
-    if (currentGameObject.player_black !== null) {
-        if (currentGameObject.player_white !== username && currentGameObject.player_black !== username)
+    if (currentGameObject.player2 !== null) {
+        if (currentGameObject.player1 !== username && currentGameObject.player2 !== username)
             return false
     }
     return true
@@ -78,17 +84,17 @@ export async function isAllowedToConnectToGame(token: string, game_id: string): 
 
 // Connect to a game that does not have a "player_black"
 export async function connectToGame(token: string, game_id: string): Promise<GameObject> {
-    
+
     const username = await Users.tokenToUsername(token)
 
     if (!(await isAllowedToConnectToGame(token, game_id))) throw ERRORS.NOT_AUTHORIZED_TO_CONNECT
 
     var currentGameObject = await Games.getGame(game_id)
 
-    if (currentGameObject.player_black === null) {
+    if (currentGameObject.player2 === null) {
         await Games.updateGame({
             ...currentGameObject,
-            player_black: username
+            player2: username
         })
         // Capture the updated game
         currentGameObject = await Games.getGame(game_id)
@@ -105,7 +111,7 @@ export async function executeGameMove(token: string, game_id: string, move: stri
 
     const gameObject = await Games.getGame(game_id)
 
-    if (username !== gameObject.player_black && username !== gameObject.player_white)
+    if (username !== gameObject.player2 && username !== gameObject.player1)
         throw ERRORS.NOT_AUTHORIZED
 
     const testBoard = stringToBoard(gameObject.board)
@@ -115,7 +121,7 @@ export async function executeGameMove(token: string, game_id: string, move: stri
         throw ERRORS.UNKNOWN_ERROR(500, 'Could not parse remote board')
     }
 
-    const playerPieces = username === gameObject.player_white ? PieceColor.WHITE : PieceColor.BLACK
+    const playerPieces = username === gameObject.player1 ? PieceColor.WHITE : PieceColor.BLACK
     if (gameObject.turn != playerPieces)
         throw ERRORS.NOT_YOUR_TURN
 
@@ -132,7 +138,7 @@ export async function executeGameMove(token: string, game_id: string, move: stri
     )
     // Return the updated game
     return Games.getGame(game_id)
-} 
+}
 
 export async function gameExists(token: string, game_id: string): Promise<boolean> {
     await Users.tokenToUsername(token)
@@ -191,7 +197,7 @@ export async function getUserPublic(token: string, username: string) {
 
 export async function updateUserPassword(token: string, new_password: string) {
     const username = await Users.tokenToUsername(token)
-    
+
     Users.validatePassword(new_password)
 
     if (!await Users.userExists(username))
@@ -215,16 +221,16 @@ export async function updateUserPublic(token: string, user_to_update: string, us
 export async function validateCredentials(username: string, password: string) {
     if (!(await Users.userExists(username)))
         throw ERRORS.USER_DOES_NOT_EXIST
-    
+
     return Users.validateCredentials(username, password)
 }
 
 /* --------------------------- FRIENDS --------------------------- */
 
-export async function getFriends(token: string, username: string | null =  null): Promise<string[]> {
+export async function getFriends(token: string, username: string | null = null): Promise<string[]> {
     const authedUser = await Users.tokenToUsername(token)
-    
-    var usertosearch = username !== null ? username : authedUser 
+
+    var usertosearch = username !== null ? username : authedUser
 
     if (usertosearch !== authedUser) {
         if (!(await Users.userExists(usertosearch)))
@@ -236,7 +242,7 @@ export async function getFriends(token: string, username: string | null =  null)
 
 export async function addFriend(token: string, friend_name: string): Promise<void> {
     const username = await Users.tokenToUsername(token)
-    
+
     if (!(await Users.userExists(friend_name)))
         throw ERRORS.USER_DOES_NOT_EXIST
 

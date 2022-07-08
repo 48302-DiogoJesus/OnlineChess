@@ -3,7 +3,7 @@ import GameSchema, { GameObject } from './schemas/game'
 import ERRORS from '../errors/errors'
 
 function validateGameID(game_id: string) {
-    if (!(game_id.length >= 4 && game_id.length <= 20)) {
+    if (!(game_id.length >= 5 && game_id.length <= 20)) {
         throw ERRORS.INVALID_GAMEID_LENGTH
     }
     if (game_id.includes(' '))
@@ -31,7 +31,7 @@ export function getGames(limit: boolean = false) {
         var games = []
         if (limit)
             games = await GameSchema.find().limit(MAX_GAMES_RETRIEVED)
-        else 
+        else
             games = await GameSchema.find()
         return games
     })
@@ -49,7 +49,7 @@ export function createGame(gameObject: GameObject, bypass_game_id_validation: bo
 
 export function updateGame(gameObject: GameObject) {
     return executeInDB(async () => {
-        await GameSchema.findOneAndUpdate({ _id: gameObject._id}, gameObject)
+        await GameSchema.findOneAndUpdate({ _id: gameObject._id }, gameObject)
         return true
     })
 }

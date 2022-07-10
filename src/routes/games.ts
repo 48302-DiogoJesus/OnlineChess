@@ -23,16 +23,27 @@ router.post('/', (req, res) => {
     })
 })
 
+// Tottally unsafe. Should store the tokens of the users already spectating on a Set (unique)
+router.post('/incrementviewers', (req, res) => {
+    executeSafe(res, async () => {
+        const game_id = req.body.id
+
+        if (game_id === undefined) throw ERRORS.BAD_REQUEST('Game ID not provided!')
+
+        await Services.incrementViewers(game_id)
+
+        res.sendStatus(200)
+    })
+})
+
 // Get the updated data for a specific game 
 router.get('/', (req, res) => {
     executeSafe(res, async () => {
-        const token = getToken(req)
-
         const game_id = req.query.id
 
         if (game_id === undefined) throw ERRORS.BAD_REQUEST('Game ID not provided!')
 
-        const gameObject = await Services.getGame(token, game_id.toString())
+        const gameObject = await Services.getGame(game_id.toString())
 
         res.status(200).json({
             data: gameObject

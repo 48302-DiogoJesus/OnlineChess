@@ -17,8 +17,8 @@ import { MoveObject, Position } from "./position"
  */
 
 export enum PieceColor {
-  BLACK = 'b',
-  WHITE = 'w',
+    BLACK = 'b',
+    WHITE = 'w',
 }
 
 export function getOpponent(pieceColor: PieceColor) {
@@ -32,7 +32,7 @@ export function getOpponent(pieceColor: PieceColor) {
  * @param {ifBlack} Return this value if [piece] is black
  * @returns {ifWhite} if {piece} is white, {ifBlack} if {ifWhite} is black
  */
-export function selectByPieceColor<T>(pieceColor: PieceColor, ifWhite: T, ifBlack: T) : T {
+export function selectByPieceColor<T>(pieceColor: PieceColor, ifWhite: T, ifBlack: T): T {
     return pieceColor === PieceColor.WHITE ? ifWhite : ifBlack
 }
 
@@ -40,31 +40,31 @@ export function selectByPieceColor<T>(pieceColor: PieceColor, ifWhite: T, ifBlac
  * Piece Type
  */
 export enum PieceType {
-    PAWN = 'p', 
-    KING = 'k', 
-    QUEEN = 'q', 
-    ROOK = 'r', 
+    PAWN = 'p',
+    KING = 'k',
+    QUEEN = 'q',
+    ROOK = 'r',
     KNIGHT = 'n',
     BISHOP = 'b'
 }
 
-enum Direction { UP, DOWN, LEFT, RIGHT } 
+enum Direction { UP, DOWN, LEFT, RIGHT }
 
 export enum MoveState { OK, NO_CHANGE, PATH_INVALID, PATH_BLOCKED, DEST_BLOCKED }
 
 function calculateDirection(move: MoveObject) {
     const result = new Set()
-    
+
     if (move.end.row < move.start.row)
         result.add(Direction.UP)
     else if (move.end.row > move.start.row)
         result.add(Direction.DOWN)
-    
+
     if (move.end.column < move.start.column)
         result.add(Direction.LEFT)
     else if (move.end.column > move.start.column)
         result.add(Direction.RIGHT)
-    
+
     return result
 }
 
@@ -76,7 +76,7 @@ export abstract class Piece {
         const current = Position(move.start.column, move.start.row)
 
         while (true) {
-            if (direction.has(Direction.UP)) 
+            if (direction.has(Direction.UP))
                 current.row--
             if (direction.has(Direction.DOWN))
                 current.row++
@@ -88,8 +88,8 @@ export abstract class Piece {
             if (current.column == move.end.column && current.row == move.end.row) {
                 return false
             }
-            
-            if (board.getPieceAt(current) !== null) 
+
+            if (board.getPieceAt(current) !== null)
                 return true
         }
     };
@@ -112,7 +112,7 @@ export abstract class Piece {
         return MoveState.OK
     };
     abstract toString(): string;
-} 
+}
 
 export class King extends Piece {
     color: PieceColor
@@ -174,7 +174,7 @@ export class Knight extends Piece {
     }
     override validPath = (move: MoveObject, board: BoardObject): boolean => {
         return Math.abs(move.end.column - move.start.column) == 2 && Math.abs(move.end.row - move.start.row) == 1
-        || Math.abs(move.end.column - move.start.column) == 1 && Math.abs(move.end.row - move.start.row) == 2
+            || Math.abs(move.end.column - move.start.column) == 1 && Math.abs(move.end.row - move.start.row) == 2
     }
     toString = (): string => pieceToChar(this)
 }
@@ -191,17 +191,17 @@ export class Pawn extends Piece {
     override validPath = (move: MoveObject, board: BoardObject): boolean => {
         const steps = this.hasMoved ? 1 : 2
         const direction = selectByPieceColor(this.color, -1, 1)
-        
+
         return (
-                // Vertical movement
-                move.start.column == move.end.column
-                && (direction == -1 ?
-                    (board.getPieceAt(move.end) == null && move.start.row > move.end.row && move.start.row - move.end.row <= steps)
-                    :
-                    (board.getPieceAt(move.end) == null && move.end.row > move.start.row && move.end.row - move.start.row <= steps)
-                )
-            ) 
-            || 
+            // Vertical movement
+            move.start.column == move.end.column
+            && (direction == -1 ?
+                (board.getPieceAt(move.end) == null && move.start.row > move.end.row && move.start.row - move.end.row <= steps)
+                :
+                (board.getPieceAt(move.end) == null && move.end.row > move.start.row && move.end.row - move.start.row <= steps)
+            )
+        )
+            ||
             (
                 // Horizontal movement
                 Math.abs(move.start.column - move.end.column) == 1
@@ -218,14 +218,17 @@ const charPieceMap = {
     'B': Bishop,
     'Q': Queen,
     'N': Knight,
-    'P': Pawn
+    'P': Pawn,
 }
 
 export const charToPiece = (char: string) => {
     for (const entry of Object.entries(charPieceMap)) {
-        if (entry[0] === char.toUpperCase()) {
+        const pieceChar = entry[0]
+        const pieceClass = entry[1]
+        if (pieceChar === char.toUpperCase()) {
             const color = char === char.toUpperCase() ? PieceColor.WHITE : PieceColor.BLACK
-            return new entry[1](color)
+            const newPiece = new pieceClass(color)
+            return newPiece
         }
     }
     return null

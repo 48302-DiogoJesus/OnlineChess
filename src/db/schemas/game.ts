@@ -4,20 +4,25 @@ const { Schema } = mongoose;
 
 export interface GameObject {
   _id: string,
-  player1: string,   // username of player1
-  player2: string | null,  // username of player2
-  board: string,
+  player_w: string,   // username of player1
+  player_b: string | null,  // username of player2
+
+  moves: string[],
   winner: PieceColor | null,
-  turn: PieceColor
+  views: number
 }
 
 const Game = new Schema({
   _id: { type: String, required: true },
-  player1: { type: String, required: true },
-  player2: { type: String, required: false },
-  board: { type: String, required: true },
+  player_w: { type: String, required: true },
+  player_b: { type: String, required: false },
+
+  moves: [
+    { type: String, required: true }
+  ],
   winner: { type: String, required: false },
-  turn: { type: String, required: true }
+  views: { type: Number, required: true },
+  // turn: { type: String, required: true }
 }, { collection: 'Games' });
 
 export default mongoose.model("GameSchema", Game)

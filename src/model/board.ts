@@ -1,4 +1,4 @@
-import { 
+import {
   Piece,
   charToPiece,
   selectByPieceColor,
@@ -8,16 +8,17 @@ import {
   Knight,
   Queen,
   Rook,
-  Bishop, 
+  Bishop,
   getOpponent,
   pieceToChar,
   MoveState
 } from './piece'
-import { PositionObject, Position, stringToMove, Move } from './position'
-import ERRORS from '../errors/errors'
+import { PositionObject, Position, stringToMove, Move, MoveObject, moveToString } from './position'
+import ERROR from '../errors/errors'
 
 export const BOARD_WIDTH = 8;
 export const BOARD_HEIGHT = 8;
+
 
 /**
  * Board Object
@@ -25,32 +26,48 @@ export const BOARD_HEIGHT = 8;
  */
 export class BoardObject {
 
-  board: Array<Array<Piece | null>> = Array(BOARD_HEIGHT).fill(null).map(()=>Array(BOARD_WIDTH).fill(null));
+  board: Array<Array<Piece | null>> = Array(BOARD_HEIGHT).fill(null).map(() => Array(BOARD_WIDTH).fill(null));
   winner: PieceColor | null = null
   turn: PieceColor = PieceColor.WHITE
+  moves: MoveObject[] = []
 
   /**
    * BoardObject Class contructor
    * @param {initBoard} If true it will initialize this.board with pieces at default positions (true by default)
    * @returns A new instance of BoardObject
-   */ 
-  constructor(initBoard: boolean = true) {
+   */
+  constructor(initTurn: PieceColor | null = null, initBoard: boolean = true) {
     if (initBoard) {
       this.initBoard()
     }
+    if (initTurn != null) {
+      this.turn = initTurn
+    }
+  }
+
+  stringMoves() {
+    return this.moves.map(move => moveToString(move))
   }
 
   /**
    * Initialize Board
    * Set the default rows with the default chess pieces in the current board
    */
-   initBoard() {
+  initBoard() {
     // Set White pieces
     this.setRow("rnbqkbnr", 0)
     this.setRow("pppppppp", 1)
     // Set Black pieces
     this.setRow("PPPPPPPP", BOARD_HEIGHT - 2)
     this.setRow("RNBQKBNR", BOARD_HEIGHT - 1)
+  }
+
+  static fromMoves(moves: string[]) {
+    const baseBoard = new BoardObject()
+    for (const move of moves) {
+      baseBoard.makeMove(move)
+    }
+    return baseBoard
   }
 
   /**
@@ -68,15 +85,16 @@ export class BoardObject {
    * @param {position} Position in the board. Has a row and a column
    * @returns A Piece if there is a piece at [position], null if not
    */
-  getPieceAt = (position: PositionObject) => this.board[position.row][position.column]
+  getPieceAt = (position: PositionObject): Piece | null => this.board[position.row][position.column]
 
   findKingPosition = (): PositionObject | null => {
     for (let row = 0; row < BOARD_HEIGHT; row++) {
       for (let col = 0; col < BOARD_WIDTH; col++) {
-          const currentPosition = Position(col, row)
-          const currentPiece = this.getPieceAt(currentPosition)
-          if (currentPiece instanceof King && this.turn == currentPiece.color)
-            return currentPosition
+        const currentPosition = Position(col, row)
+        const currentPiece = this.getPieceAt(currentPosition)
+
+        if (currentPiece instanceof King && this.turn == currentPiece.color)
+          return currentPosition
       }
     }
     return null
@@ -88,21 +106,21 @@ export class BoardObject {
     if (piece === null)
       return possibleEndPositions
 
-      for (let row = 0; row < BOARD_HEIGHT; row++) {
-        for (let col = 0; col < BOARD_WIDTH; col++) {
-            const currentPosition = Position(col, row)
-            const pieceAtEndPos = this.getPieceAt(Position(col, row))
+    for (let row = 0; row < BOARD_HEIGHT; row++) {
+      for (let col = 0; col < BOARD_WIDTH; col++) {
+        const currentPosition = Position(col, row)
+        const pieceAtEndPos = this.getPieceAt(Position(col, row))
 
-            // If piece is from the same player trying to make the move don't try it
-            if (pieceAtEndPos != null && pieceAtEndPos.color == piece.color)
-              continue
-            
-            const moveState = piece.checkMove(Move(pieceToChar(piece), piecePosition, currentPosition), this)
+        // If piece is from the same player trying to make the move don't try it
+        if (pieceAtEndPos != null && pieceAtEndPos.color == piece.color)
+          continue
 
-            if (moveState == MoveState.OK) {
-              possibleEndPositions.add(currentPosition)
-            }
+        const moveState = piece.checkMove(Move(pieceToChar(piece), piecePosition, currentPosition), this)
+
+        if (moveState == MoveState.OK) {
+          possibleEndPositions.add(currentPosition)
         }
+      }
     }
     return possibleEndPositions
   }
@@ -122,62 +140,63 @@ export class BoardObject {
 
     this.setPieceAt(kingPosition, null)
 
-    for (const target of possibleKingTargets) {
-        // Remove King from the board to corretly make the predictions
-        // For all the board pieces
-        for (let row = 0; row < BOARD_HEIGHT; row++) {
-          for (let col = 0; col < BOARD_WIDTH; col++) {
-                const enemyPosition = Position(col, row)
-                const enemyPiece = this.getPieceAt(enemyPosition)
+    possibleKingTargets.forEach((target) => {
+      // Remove King from the board to corretly make the predictions
+      // For all the board pieces
+      for (let row = 0; row < BOARD_HEIGHT; row++) {
+        for (let col = 0; col < BOARD_WIDTH; col++) {
+          const enemyPosition = Position(col, row)
+          const enemyPiece = this.getPieceAt(enemyPosition)
 
-                const targetPiece = this.getPieceAt(target)
-                this.setPieceAt(target, null)
-                /*
-                 If Enemy Piece Generate it's possible moves and those that match the
-                 king targets are added to the "collisions" Set
-                 */
-                if (enemyPiece != null && enemyPiece.color != this.turn) {
-                    const possibleEnemyTargets = this.generateAllPossibleTargets(enemyPosition)
-                    /*
-                     If piece is a pawn it can only eat in diagonal so moving forward is not a threat to King
-                     */
-                    if (enemyPiece instanceof Pawn) {
-                        const direction = selectByPieceColor(this.turn, -1, 1)
-                        // Add diagonals as Pawn targets
-                        if (enemyPosition.column < BOARD_WIDTH - 1)
-                            possibleEnemyTargets.add(Position(enemyPosition.column + 1, enemyPosition.row - direction))
-                        if (enemyPosition.column > 0)
-                            possibleEnemyTargets.add(Position(enemyPosition.column - 1, enemyPosition.row - direction))
+          const targetPiece = this.getPieceAt(target)
+          this.setPieceAt(target, null)
+          /*
+           If Enemy Piece Generate it's possible moves and those that match the
+           king targets are added to the "collisions" Set
+           */
+          if (enemyPiece != null && enemyPiece.color != this.turn) {
+            const possibleEnemyTargets = this.generateAllPossibleTargets(enemyPosition)
+            /*
+             If piece is a pawn it can only eat in diagonal so moving forward is not a threat to King
+             */
+            if (enemyPiece instanceof Pawn) {
+              const direction = selectByPieceColor(this.turn, -1, 1)
+              // Add diagonals as Pawn targets
+              if (enemyPosition.column < BOARD_WIDTH - 1)
+                possibleEnemyTargets.add(Position(enemyPosition.column + 1, enemyPosition.row - direction))
+              if (enemyPosition.column > 0)
+                possibleEnemyTargets.add(Position(enemyPosition.column - 1, enemyPosition.row - direction))
 
-                        // Remove targets in which pawn moves vertically
-                        possibleEnemyTargets.forEach((enemyTarget: PositionObject) => {
-                          if (enemyTarget.column == enemyPosition.column)
-                            possibleEnemyTargets.delete(enemyTarget)
-                        })
-                    }
-                    // Remove suicide targets
-                    for (const enemyTarget of possibleEnemyTargets) {
-                        for (const target of possibleKingTargets) {
-                          if (enemyTarget.column === target.column && enemyTarget.row === target.row)
-                            collisions.add(enemyTarget)
-                        }
-                    }
-                }
-                // Put target piece back again
-                this.setPieceAt(target, targetPiece)
+              // Remove targets in which pawn moves vertically
+              possibleEnemyTargets.forEach((enemyTarget: PositionObject) => {
+                if (enemyTarget.column == enemyPosition.column)
+                  possibleEnemyTargets.delete(enemyTarget)
+              })
             }
+            // Remove suicide targets
+            possibleEnemyTargets.forEach((enemyTarget) => {
+              possibleKingTargets.forEach(target => {
+                if (enemyTarget.column === target.column && enemyTarget.row === target.row)
+                  collisions.add(enemyTarget)
+              })
+            })
+          }
+          // Put target piece back again
+          this.setPieceAt(target, targetPiece)
         }
-    }
+      }
+    })
+
     // Put King back to the board after predicting enemy targets
     this.setPieceAt(kingPosition, new King(this.turn))
     /*
      Remove from the King targets the suicide positions
      */
     possibleKingTargets.forEach((kingPos: PositionObject) => {
-      for (const collision of collisions) {
+      collisions.forEach(collision => {
         if (collision.column === kingPos.column && collision.row === kingPos.row)
           possibleKingTargets.delete(kingPos)
-      }
+      })
     })
     return possibleKingTargets
   }
@@ -194,10 +213,10 @@ export class BoardObject {
         const piece = this.getPieceAt(piecePosition)
         if (piece != null && piece.color == getOpponent(this.turn)) {
           const possibleMovesForPiece = this.generateAllPossibleTargets(piecePosition)
-          for (const move of possibleMovesForPiece) {
-            if (move.column === kingPosition.column && move.row === kingPosition.row)  
+          possibleMovesForPiece.forEach(move => {
+            if (move.column === kingPosition.column && move.row === kingPosition.row)
               return true
-          }
+          })
         }
       }
     }
@@ -210,14 +229,14 @@ export class BoardObject {
     const piece = this.getPieceAt(move.start)
     const capturePiece = this.getPieceAt(move.end)
 
-    if (this.winner !== null) {
-      throw ERRORS.ALREADY_OVER
+    if (this.winner != null) {
+      throw ERROR.ALREADY_OVER
     }
 
-    if (piece === null) throw ERRORS.NO_PIECE_AT_START_POSITION
+    if (piece === null) throw ERROR.NO_PIECE_AT_START_POSITION
 
     if (!(piece instanceof King) && this.isInCheck()) {
-      throw ERRORS.KING_IN_CHECK
+      throw ERROR.KING_IN_CHECK
     }
 
     if (
@@ -228,25 +247,38 @@ export class BoardObject {
       // Check if it's valid promotion piece
       (maybePromotionPiece instanceof Knight || maybePromotionPiece instanceof Queen || maybePromotionPiece instanceof Bishop || maybePromotionPiece instanceof Rook)
     ) {
-        // Transform pawn
-        this.setPieceAt(move.end, maybePromotionPiece)
-        this.setPieceAt(move.start, null)
+      // Transform pawn
+      this.setPieceAt(move.end, maybePromotionPiece)
+      this.setPieceAt(move.start, null)
     } else {
-        this.setPieceAt(move.end, piece)
-        this.setPieceAt(move.start, null)
+      this.setPieceAt(move.end, piece)
+      this.setPieceAt(move.start, null)
     }
 
     if (piece instanceof Pawn)
-        piece.hasMoved = true
-
-    if (capturePiece instanceof King)
-        this.winner = this.turn
-
-    this.turn = getOpponent(this.turn)
+      piece.hasMoved = true
 
     // If this move makes the other player's King be in check and with nowhere to go tell board he won
     if (this.isInCheck() && this.generateSafeKingTargets().size === 0)
-        this.winner = getOpponent(this.turn)
+      this.winner = getOpponent(this.turn)
+
+    this.turn = getOpponent(this.turn)
+
+    this.updateWinner()
+    this.moves.push(move)
+  }
+
+  updateWinner() {
+    if (this.findKingPosition() == null) {
+      this.winner = getOpponent(this.turn)
+    }
+    const backupTurn = this.turn
+    this.turn = getOpponent(this.turn)
+
+    if (this.findKingPosition() == null) {
+      this.winner = getOpponent(this.turn)
+    }
+    this.turn = backupTurn
   }
 
   /**
@@ -256,11 +288,11 @@ export class BoardObject {
    */
   toString() {
     var boardAsString: string = ""
-    this.board.map((row, rowIdx) => row.map((col, colIdx) => { 
+    this.board.map((row, rowIdx) => row.map((col, colIdx) => {
       const piece = this.getPieceAt(Position(colIdx, rowIdx))
       if (piece == null) {
         boardAsString += " "
-      } else { 
+      } else {
         boardAsString += selectByPieceColor(piece.color, piece.toString().toUpperCase(), piece.toString())
       }
     }))
@@ -290,17 +322,33 @@ export class BoardObject {
  * @param {boardAsString} Example of a default board: "rnbqkbnrpppppppp                                PPPPPPPPRNBQKBNR"
  * @returns A new BoardObject if {boardAsString} is convertible to a board, null if not
  */
-export function stringToBoard(boardAsString: string): BoardObject | null {
+/* export function stringToBoard(boardAsString: string, initTurn: PieceColor | null = null): BoardObject {
   if (boardAsString.length != BOARD_WIDTH * BOARD_HEIGHT)
-    throw ERRORS.BAD_BOARD_STRING
-  const newBoard = new BoardObject()
+    throw ERROR.BAD_BOARD_STRING
+
+  var blackHasKing = false
+  var whiteHasKing = false
+
+  const newBoard = new BoardObject(initTurn, false)
   for (let row = 0, currChar = 0; row < BOARD_HEIGHT; row++) {
     for (let col = 0; col < BOARD_WIDTH; col++, currChar++) {
       const pieceChar = boardAsString[currChar]
-        const piece: Piece | null = charToPiece(pieceChar)
-        // [piece] will be null if char does not correspond to a piece. Case of the " " representing an empty Tile
-        newBoard.setPieceAt(Position(col, row), piece)
+      const piece: Piece | null = charToPiece(pieceChar)
+      if (piece instanceof King) {
+        if (piece.color == PieceColor.WHITE) {
+          whiteHasKing = true
+        } else if (piece.color == PieceColor.BLACK) {
+          blackHasKing = true
+        }
+      }
+      // [piece] will be null if char does not correspond to a piece. Case of the " " representing an empty Tile
+      newBoard.setPieceAt(Position(col, row), piece)
     }
   }
+  if (!blackHasKing)
+    newBoard.winner = PieceColor.WHITE
+  if (!whiteHasKing)
+    newBoard.winner = PieceColor.BLACK
   return newBoard
 }
+ */

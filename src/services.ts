@@ -2,14 +2,14 @@ import Games from './db/games'
 import Users from './db/users'
 import UserFriends from './db/friends'
 
-import { BoardObject as Board, stringToBoard } from './model/board'
+import { BoardObject as Board, BoardObject } from './model/board'
 import ERRORS from './errors/errors'
 import { UserPublicObject } from './db/schemas/userPublic'
 import { getOpponent, PieceColor } from './model/piece'
 import { GameObject } from './db/schemas/game'
 
 const bundled = {
-    gameExists, createGame, getGame, getGames, getGamesById, isAllowedToConnectToGame, connectToGame, executeGameMove, deleteGame,
+    gameExists, createGame, getGame, getGames, getGamesById, isAllowedToConnectToGame, connectToGame, executeGameMove, deleteGame, incrementViewers,
     getUsers, userExists, createUser, deleteUser, getUserPublic, updateUserPassword, updateUserPublic, validateCredentials,
     getFriends, addFriend, removeFriend, hasFriend
 }
@@ -42,25 +42,22 @@ export async function createGame(token: string, game_id: string, player2: string
     // Build Remote Board Object
     const defaultBoard = new Board()
     // Build a Game
-    const gameObject = {
+    const gameObject: GameObject = {
         _id: game_id,
 
-        player1: username,
-        player2: player2,   // Could be null or an actual username
+        player_w: username,
+        player_b: player2,   // Could be null or an actual username
 
-        turn: defaultBoard.turn,
+        moves: defaultBoard.stringMoves(),
 
-        board: defaultBoard.toString(),
-
-        winner: defaultBoard.winner
+        winner: defaultBoard.winner,
+        views: 0
     }
     await Games.createGame(gameObject)
     return Games.getGame(game_id)
 }
 
-export async function getGame(token: string, game_id: string) {
-    await Users.tokenToUsername(token)
-
+export async function getGame(game_id: string) {
     if (!(await Games.gameExists(game_id))) throw ERRORS.GAME_DOES_NOT_EXIST
 
     return Games.getGame(game_id)
@@ -75,8 +72,8 @@ export async function isAllowedToConnectToGame(token: string, game_id: string): 
     const currentGameObject = await Games.getGame(game_id)
 
     // If player2(black) has already connected make sure the player whos connecting is allowed
-    if (currentGameObject.player2 !== null) {
-        if (currentGameObject.player1 !== username && currentGameObject.player2 !== username)
+    if (currentGameObject.player_b !== null) {
+        if (currentGameObject.player_w !== username && currentGameObject.player_b !== username)
             return false
     }
     return true
@@ -91,16 +88,15 @@ export async function connectToGame(token: string, game_id: string): Promise<Gam
 
     var currentGameObject = await Games.getGame(game_id)
 
-    if (currentGameObject.player2 === null) {
+    if (currentGameObject.player_b === null) {
         await Games.updateGame({
             ...currentGameObject,
-            player2: username
+            player_b: username
         })
         // Capture the updated game
         currentGameObject = await Games.getGame(game_id)
     }
     // In case both players have already connected at least once dont update the game, just send them the most updated game version
-
     return currentGameObject
 }
 
@@ -111,29 +107,26 @@ export async function executeGameMove(token: string, game_id: string, move: stri
 
     const gameObject = await Games.getGame(game_id)
 
-    if (username !== gameObject.player2 && username !== gameObject.player1)
+    if (username !== gameObject.player_b && username !== gameObject.player_w)
         throw ERRORS.NOT_AUTHORIZED
 
-    const testBoard = stringToBoard(gameObject.board)
-    // If remote game as string is invalid just delete it
-    if (testBoard === null) {
-        await Games.deleteGame(game_id)
-        throw ERRORS.UNKNOWN_ERROR(500, 'Could not parse remote board')
-    }
+    const testBoard = BoardObject.fromMoves(gameObject.moves)
 
-    const playerPieces = username === gameObject.player1 ? PieceColor.WHITE : PieceColor.BLACK
-    if (gameObject.turn != playerPieces)
+    const playerPieces =
+        username === gameObject.player_w ? PieceColor.WHITE : PieceColor.BLACK
+
+    if (testBoard.turn != playerPieces)
         throw ERRORS.NOT_YOUR_TURN
 
     // If not valid, makeMove throws and api handles error
     testBoard.makeMove(move)
-    // Update remote game
+
+    // If no errors happen validating update db remote game
     await Games.updateGame(
         {
             ...gameObject,
-            board: testBoard.toString(),
+            moves: testBoard.stringMoves(),
             winner: testBoard.winner,
-            turn: getOpponent(playerPieces)
         }
     )
     // Return the updated game
@@ -151,6 +144,12 @@ export async function deleteGame(game_id: string) {
     if (!(await Games.gameExists(game_id))) throw ERRORS.GAME_DOES_NOT_EXIST
 
     return Games.deleteGame(game_id)
+}
+
+export async function incrementViewers(game_id: string) {
+    if (!(await Games.gameExists(game_id))) throw ERRORS.GAME_DOES_NOT_EXIST
+
+    return Games.incrementViewers(game_id)
 }
 
 /* --------------------------- USERS --------------------------- */

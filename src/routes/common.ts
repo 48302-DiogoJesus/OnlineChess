@@ -5,6 +5,7 @@ export async function executeSafe(res: Response, block: (...args: any[]) => any)
     try {
         await block()
     } catch (err: any) {
+        console.log(err)
         if (err.http_code === undefined) {
             res.status(500).json({ error: err })
         } else {

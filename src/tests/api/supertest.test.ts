@@ -403,8 +403,8 @@ describe('API Tests', () => {
             const gameObject = response.body.data as GameObject
             expect(gameObject._id).toEqual(testGameID)
             expect(gameObject.turn).toEqual("w")
-            expect(gameObject.player1).toEqual(testUsername)
-            expect(gameObject.player2).toEqual('Test_User')
+            expect(gameObject.player_w).toEqual(testUsername)
+            expect(gameObject.player_b).toEqual('Test_User')
             expect(gameObject.winner).toBeNull()
             expect(gameObject.board.length).toBe(64)
 
@@ -429,8 +429,8 @@ describe('API Tests', () => {
             const gameObject = response.body.data as GameObject
             expect(gameObject._id).toEqual(testGameID)
             expect(gameObject.turn).toEqual("w")
-            expect(gameObject.player1).toEqual(testUsername)
-            expect(gameObject.player2).toEqual('Test_User')
+            expect(gameObject.player_w).toEqual(testUsername)
+            expect(gameObject.player_b).toEqual('Test_User')
             expect(gameObject.winner).toBeNull()
             expect(gameObject.board.length).toBe(64)
 
@@ -447,8 +447,8 @@ describe('API Tests', () => {
             const gameObject1 = response.body.data as GameObject
             expect(gameObject1._id).toEqual(testGameID)
             expect(gameObject1.turn).toEqual("w")
-            expect(gameObject1.player1).toEqual(testUsername)
-            expect(gameObject1.player2).toEqual('Test_User')
+            expect(gameObject1.player_w).toEqual(testUsername)
+            expect(gameObject1.player_b).toEqual('Test_User')
             expect(gameObject1.winner).toBeNull()
             expect(gameObject1.board.length).toBe(64)
 

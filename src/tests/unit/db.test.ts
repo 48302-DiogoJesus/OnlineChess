@@ -207,8 +207,8 @@ describe('Services Tests', () => {
             const game = await Services.getGame(testToken, testGameID)
             await Services.deleteUser(newUserToken, 'test_user')
             expect(game._id).toBe(testGameID)
-            expect(game.player1).toBe(testUsername)
-            expect(game.player2).toBe('test_user')
+            expect(game.player_w).toBe(testUsername)
+            expect(game.player_b).toBe('test_user')
             expect(game.turn).toBe("w")
             expect(game.winner).toBeNull()
         })
@@ -261,8 +261,8 @@ describe('Services Tests', () => {
             const token2 = await Services.createUser('New_User_2', 'mypassword')
 
             expect(await Services.connectToGame(token2, testGameID)).toBeTruthy()
-            expect((await Services.getGame(token2, testGameID)).player1).toBe(testUsername)
-            expect((await Services.getGame(token2, testGameID)).player2).toBe('New_User_2')
+            expect((await Services.getGame(token2, testGameID)).player_w).toBe(testUsername)
+            expect((await Services.getGame(token2, testGameID)).player_b).toBe('New_User_2')
 
             expect((await expectThrow(Services.executeGameMove, token2, testGameID, 'pb2b4'))!!.message).toBe(ERRORS.NOT_YOUR_TURN.message)
             expect(await Services.executeGameMove(testToken, testGameID, 'pb2b4')).toBeTruthy()

@@ -5,11 +5,11 @@ import UserFriends from './db/friends'
 import { BoardObject as Board, BoardObject } from './model/board'
 import ERRORS from './errors/errors'
 import { UserPublicObject } from './db/schemas/userPublic'
-import { getOpponent, PieceColor } from './model/piece'
+import { PieceColor } from './model/piece'
 import { GameObject } from './db/schemas/game'
 
 const bundled = {
-    gameExists, createGame, getGame, getGames, getGamesById, isAllowedToConnectToGame, connectToGame, executeGameMove, deleteGame, incrementViewers,
+    gameExists, createGame, getGame, getGames, getGamesById, connectToGame, executeGameMove, deleteGame, incrementViewers,
     getUsers, userExists, createUser, deleteUser, getUserPublic, updateUserPassword, updateUserPublic, validateCredentials,
     getFriends, addFriend, removeFriend, hasFriend
 }
@@ -25,11 +25,11 @@ export async function getGames(token: string, limit: boolean = false): Promise<G
 
 export async function getGamesById(token: string, game_id: string) {
     const allGames = await getGames(token)
-    return allGames.filter(game => game._id.includes(game_id))
+    return allGames.filter(game => game._id.includes(game_id) && game.public)
 }
 
 // Any player can connect as "player_black" later if player_black = null
-export async function createGame(token: string, game_id: string, player2: string | null = null) {
+export async function createGame(token: string, game_id: string, is_public: boolean | undefined, player2: string | null = null) {
     // Throws if not authenticated
     const username = await Users.tokenToUsername(token)
 
@@ -37,7 +37,7 @@ export async function createGame(token: string, game_id: string, player2: string
 
     // If player2 is passed validate it exists
     if (player2 !== null && !(await Users.userExists(player2)))
-        throw ERRORS.USER_DOES_NOT_EXIST
+        throw ERRORS.PLAYER2_DOES_NOT_EXIST
 
     // Build Remote Board Object
     const defaultBoard = new Board()
@@ -51,53 +51,62 @@ export async function createGame(token: string, game_id: string, player2: string
         moves: defaultBoard.stringMoves(),
 
         winner: defaultBoard.winner,
-        views: 0
+        views: 0,
+
+        public: is_public ?? true
     }
     await Games.createGame(gameObject)
-    return Games.getGame(game_id)
+    return gameObject
 }
 
-export async function getGame(game_id: string) {
+export async function getGame(game_id: string, token: string | null = null) {
     if (!(await Games.gameExists(game_id))) throw ERRORS.GAME_DOES_NOT_EXIST
 
-    return Games.getGame(game_id)
-}
+    const username: string | null =
+        token != null ?
+            await Users.tokenToUsername(token)
+            : null
+    const game = await Games.getGame(game_id)
+    const is_public = game.public
 
-// Allows to join a game. Either an ongoing game or as player2 in the beggining of the game 
-export async function isAllowedToConnectToGame(token: string, game_id: string): Promise<boolean> {
-    const username = await Users.tokenToUsername(token)
+    // If no token provided allow to get game if not private
+    if (username == null && !is_public)
+        throw ERRORS.GAME_IS_PRIVATE
 
-    if (!(await Games.gameExists(game_id))) throw ERRORS.GAME_DOES_NOT_EXIST
+    // If token provided and he is not one of the players and playerb is defined
+    if (!is_public && username != null && game.player_b != null && game.player_b != username && game.player_w != username)
+        throw ERRORS.GAME_IS_PRIVATE
 
-    const currentGameObject = await Games.getGame(game_id)
-
-    // If player2(black) has already connected make sure the player whos connecting is allowed
-    if (currentGameObject.player_b !== null) {
-        if (currentGameObject.player_w !== username && currentGameObject.player_b !== username)
-            return false
-    }
-    return true
+    return game
 }
 
 // Connect to a game that does not have a "player_black"
 export async function connectToGame(token: string, game_id: string): Promise<GameObject> {
-
     const username = await Users.tokenToUsername(token)
 
-    if (!(await isAllowedToConnectToGame(token, game_id))) throw ERRORS.NOT_AUTHORIZED_TO_CONNECT
+    if (!(await Games.gameExists(game_id))) throw ERRORS.GAME_DOES_NOT_EXIST
 
-    var currentGameObject = await Games.getGame(game_id)
+    var gameObject = await Games.getGame(game_id)
+    const is_public = gameObject.public
 
-    if (currentGameObject.player_b === null) {
+    // If player2(black) has already connected make sure the player whos connecting is allowed
+    if (username != null && gameObject.player_b !== null) {
+        // If not public and i'm neither of the players dont allow
+        if (!is_public && gameObject.player_w !== username && gameObject.player_b !== username)
+            throw ERRORS.NOT_AUTHORIZED_TO_CONNECT
+    }
+    // CAN JOIN AS player_b !
+    // Even if the game is private allow any player to join, just not after that
+    if (gameObject.player_b === null) {
         await Games.updateGame({
-            ...currentGameObject,
+            ...gameObject,
             player_b: username
         })
-        // Capture the updated game
-        currentGameObject = await Games.getGame(game_id)
+        // Get the updated game
+        gameObject = await Games.getGame(game_id)
     }
     // In case both players have already connected at least once dont update the game, just send them the most updated game version
-    return currentGameObject
+    return gameObject
 }
 
 export async function executeGameMove(token: string, game_id: string, move: string): Promise<GameObject> {
@@ -148,6 +157,8 @@ export async function deleteGame(game_id: string) {
 
 export async function incrementViewers(game_id: string) {
     if (!(await Games.gameExists(game_id))) throw ERRORS.GAME_DOES_NOT_EXIST
+
+    if (!(await Games.isPublic(game_id))) throw ERRORS.GAME_IS_PRIVATE
 
     return Games.incrementViewers(game_id)
 }

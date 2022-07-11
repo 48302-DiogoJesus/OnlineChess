@@ -45,6 +45,9 @@ router.get('/logout', (req: any, res: Response) => {
 router.put('/', (req, res) => {
     executeSafe(res, async () => {
         const token = getToken(req)
+        if (token == null) {
+            throw ERRORS.INVALID_TOKEN
+        }
 
         const { password } = req.body
 

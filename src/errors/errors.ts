@@ -4,6 +4,10 @@ export interface ErrorObject {
 }
 
 const GAME_ERRORS = {
+    GAME_IS_PRIVATE: {
+        http_code: 403,
+        message: "Game with that ID is private"
+    },
     GAME_ALREADY_EXISTS: {
         http_code: 409,
         message: "Game with that ID already exists"
@@ -47,6 +51,10 @@ const USER_ERRORS = {
     USER_DOES_NOT_EXIST: {
         http_code: 404,
         message: "User does not exist"
+    },
+    PLAYER2_DOES_NOT_EXIST: {
+        http_code: 404,
+        message: "The player you chose as player2 does not exist"
     },
     USER_ALREADY_EXISTS: {
         http_code: 409,

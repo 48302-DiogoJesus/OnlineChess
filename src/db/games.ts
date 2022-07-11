@@ -16,7 +16,7 @@ function validateGameID(game_id: string) {
 }
 
 const bundled = {
-    createGame, updateGame, gameExists, getGame, getGames, deleteGame, incrementViewers
+    createGame, updateGame, gameExists, getGame, getGames, deleteGame, incrementViewers, isPublic
 }
 
 export default bundled
@@ -77,5 +77,11 @@ export function deleteGame(game_id: string): Promise<boolean> {
 export function incrementViewers(game_id: string): Promise<void> {
     return executeInDB(async () => {
         await GameSchema.findOneAndUpdate({ _id: game_id }, { $inc: { 'views': 1 } })//.exec()
+    })
+}
+
+export function isPublic(game_id: string): Promise<boolean> {
+    return executeInDB(async () => {
+        return (await GameSchema.findById(game_id)).public
     })
 }

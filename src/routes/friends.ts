@@ -1,4 +1,4 @@
-import { Router, Response, Request} from "express";
+import { Router, Response, Request } from "express";
 import ERRORS from '../errors/errors'
 import { executeSafe, getToken } from "./common";
 import Services from "../services";
@@ -9,6 +9,9 @@ const router = Router()
 router.get('/:username/friends', (req, res) => {
     executeSafe(res, async () => {
         const token = getToken(req)
+        if (token == null) {
+            throw ERRORS.INVALID_TOKEN
+        }
 
         const friendsList = await Services.getFriends(token, req.params.username)
 
@@ -22,6 +25,9 @@ router.get('/:username/friends', (req, res) => {
 router.put('/friends', (req, res) => {
     executeSafe(res, async () => {
         const token = getToken(req)
+        if (token == null) {
+            throw ERRORS.INVALID_TOKEN
+        }
 
         const { friend } = req.body
 
@@ -37,6 +43,9 @@ router.put('/friends', (req, res) => {
 router.delete('/friends/:friend', (req, res) => {
     executeSafe(res, async () => {
         const token = getToken(req)
+        if (token == null) {
+            throw ERRORS.INVALID_TOKEN
+        }
 
         const friend = req.params.friend
 
@@ -52,6 +61,9 @@ router.delete('/friends/:friend', (req, res) => {
 router.get('/:username/friends/:friend', (req, res) => {
     executeSafe(res, async () => {
         const token = getToken(req)
+        if (token == null) {
+            throw ERRORS.INVALID_TOKEN
+        }
 
         const friend = req.params.friend
 
@@ -61,7 +73,7 @@ router.get('/:username/friends/:friend', (req, res) => {
 
         if (hasFriend)
             res.sendStatus(200)
-        else 
+        else
             res.sendStatus(404)
     })
 })

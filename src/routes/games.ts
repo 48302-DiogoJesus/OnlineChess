@@ -10,12 +10,17 @@ const router = Router()
 router.post('/', (req, res) => {
     executeSafe(res, async () => {
         const token = getToken(req)
+        if (token == null) {
+            throw ERRORS.INVALID_TOKEN
+        }
 
         const game_id = req.body.id
+        const is_public: boolean = req.body.public ?? true
+        const player2: string | null = req.body.player2
 
         if (game_id === undefined) throw ERRORS.BAD_REQUEST('Game ID not provided!')
 
-        const initialGameObject: GameObject = await Services.createGame(token, game_id)
+        const initialGameObject: GameObject = await Services.createGame(token, game_id, is_public, player2)
 
         res.status(201).json({
             data: initialGameObject
@@ -39,11 +44,12 @@ router.post('/incrementviewers', (req, res) => {
 // Get the updated data for a specific game 
 router.get('/', (req, res) => {
     executeSafe(res, async () => {
+        const token = getToken(req)
         const game_id = req.query.id
 
         if (game_id === undefined) throw ERRORS.BAD_REQUEST('Game ID not provided!')
 
-        const gameObject = await Services.getGame(game_id.toString())
+        const gameObject = await Services.getGame(game_id.toString(), token)
 
         res.status(200).json({
             data: gameObject
@@ -55,6 +61,9 @@ router.get('/', (req, res) => {
 router.get('/connect', (req, res) => {
     executeSafe(res, async () => {
         const token = getToken(req)
+        if (token == null) {
+            throw ERRORS.INVALID_TOKEN
+        }
 
         const game_id = req.query.id
 
@@ -71,6 +80,9 @@ router.get('/connect', (req, res) => {
 router.get('/makemove', (req, res) => {
     executeSafe(res, async () => {
         const token = getToken(req)
+        if (token == null) {
+            throw ERRORS.INVALID_TOKEN
+        }
 
         const game_id = req.query.id
         const move = req.query.move

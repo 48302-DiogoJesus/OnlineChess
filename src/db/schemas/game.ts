@@ -10,6 +10,8 @@ export interface GameObject {
   moves: string[],
   winner: PieceColor | null,
   views: number
+
+  public: boolean
 }
 
 const Game = new Schema({
@@ -22,6 +24,8 @@ const Game = new Schema({
   ],
   winner: { type: String, required: false },
   views: { type: Number, required: true },
+
+  public: { type: Boolean, required: true }
   // turn: { type: String, required: true }
 }, { collection: 'Games' });
 

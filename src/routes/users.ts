@@ -1,4 +1,4 @@
-import { Router, Response, Request} from "express";
+import { Router, Response, Request } from "express";
 import ERRORS from '../errors/errors'
 import { executeSafe, getToken } from "./common";
 import Services from "../services";
@@ -12,6 +12,9 @@ router.use(FriendRoutes)
 router.get('/:username', (req, res) => {
     executeSafe(res, async () => {
         const token = getToken(req)
+        if (token == null) {
+            throw ERRORS.INVALID_TOKEN
+        }
 
         const username = req.params.username
 
@@ -27,6 +30,9 @@ router.get('/:username', (req, res) => {
 router.get('/', (req, res) => {
     executeSafe(res, async () => {
         const token = getToken(req)
+        if (token == null) {
+            throw ERRORS.INVALID_TOKEN
+        }
 
         const users = await Services.getUsers(token)
 
@@ -40,7 +46,7 @@ router.get('/', (req, res) => {
 router.post('/', (req, res) => {
     executeSafe(res, async () => {
         const { username, password } = req.body
-        
+
         if (username === undefined || password === undefined) throw ERRORS.BAD_REQUEST('Username and password were not provided!')
 
         const userToken = await Services.createUser(username, password)
@@ -58,10 +64,14 @@ router.post('/', (req, res) => {
 
 router.delete('/:username', (req, res) => {
     executeSafe(res, async () => {
-        const username = getToken(req)
+        const token = getToken(req)
+        if (token == null) {
+            throw ERRORS.INVALID_TOKEN
+        }
+
         const user_to_delete = req.params.username
 
-        await Services.deleteUser(username, user_to_delete)
+        await Services.deleteUser(token, user_to_delete)
 
         res.sendStatus(200)
     })

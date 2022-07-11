@@ -23,7 +23,7 @@ export async function executeSafe(res: Response, block: (...args: any[]) => any)
  * @param {req} Request object
  * @returns undefined if none of the ways to extract an authentication token was successful or the token if one was
  */
-export function getToken(req: Request) {
+export function getToken(req: Request): string | undefined {
     return getUserToken(req) || getHeaderToken(req)
 }
 
@@ -33,7 +33,7 @@ export function getToken(req: Request) {
  * @param {req} Request object
  * @returns undefined if [req] does not carry a token(user not authenticated) or the token if user is authenticated
  */
-function getUserToken(req: any) {
+function getUserToken(req: any): string | undefined {
     return req.user && req.user.token
 }
 

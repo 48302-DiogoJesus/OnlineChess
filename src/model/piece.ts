@@ -238,7 +238,8 @@ export const pieceToChar = (piece: Piece) => {
     let pieceChar
     if (piece instanceof Knight) {
         pieceChar = 'N'
-    } else {
+    }
+    else {
         pieceChar = piece.constructor.name[0]
     }
     return selectByPieceColor(piece.color, pieceChar.toUpperCase(), pieceChar.toLowerCase())

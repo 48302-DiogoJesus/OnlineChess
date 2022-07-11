@@ -3,8 +3,14 @@ import Services from '../../services'
 import supertest from 'supertest'
 import ExpressApp from '../../routes/routes'
 import { GameObject } from '../../db/schemas/game'
+import { BoardObject } from '../../model/board'
+import CONFIG from '../../config'
+import { clearDatabase, connectMongoDB } from '../../db/common'
 
 describe('API Tests', () => {
+
+    CONFIG.TEST_ENV = true
+    connectMongoDB().then(() => clearDatabase())
 
     const testUsername = '|T-e-s-t|U-s-e-r|'
     const testPassword = 'TestPassword'
@@ -64,8 +70,6 @@ describe('API Tests', () => {
                 .get(resources.users)
                 .set('Authorization', calcAuthorizationHeader())
                 .set('Accept', 'application/json')
-
-            console.log(response.body)
 
             expect(response.status).toBe(200)
             expect(response.body.data.length).toBe(1)
@@ -378,17 +382,18 @@ describe('API Tests', () => {
 
             expect(response.status).toBe(201)
             const initialGameObject = response.body.data as GameObject
+            const board = BoardObject.fromMoves(initialGameObject.moves)
             expect(initialGameObject._id).toEqual(testGameID)
-            expect(initialGameObject.turn).toEqual("w")
+            expect(board.turn).toEqual("w")
             expect(initialGameObject.winner).toBeNull()
-            expect(initialGameObject.board.length).toBe(64)
+            expect(board.toString().length).toBe(64)
 
             await Services.deleteGame(testGameID)
         })
 
         it('Connect to an open game as player_black', async () => {
             // Create Game
-            await Services.createGame(testToken, testGameID)
+            await Services.createGame(testToken, testGameID, true, null)
             const otherUserToken = await Services.createUser('Test_User', 'Test_Password')
 
             const response = await supertest(ExpressApp)
@@ -401,12 +406,13 @@ describe('API Tests', () => {
 
             expect(response.status).toBe(200)
             const gameObject = response.body.data as GameObject
+            const board = BoardObject.fromMoves(gameObject.moves)
             expect(gameObject._id).toEqual(testGameID)
-            expect(gameObject.turn).toEqual("w")
+            expect(board.turn).toEqual("w")
             expect(gameObject.player_w).toEqual(testUsername)
             expect(gameObject.player_b).toEqual('Test_User')
             expect(gameObject.winner).toBeNull()
-            expect(gameObject.board.length).toBe(64)
+            expect(board.toString().length).toBe(64)
 
             await Services.deleteUser(otherUserToken, 'Test_User')
             await Services.deleteGame(testGameID)
@@ -414,7 +420,7 @@ describe('API Tests', () => {
 
         it('Connect to a closed game', async () => {
             const otherUserToken = await Services.createUser('Test_User', 'Test_Password')
-            await Services.createGame(testToken, testGameID, 'Test_User')
+            await Services.createGame(testToken, testGameID, true, 'Test_User')
 
             // Connect as the invited user
             const response = await supertest(ExpressApp)
@@ -427,12 +433,13 @@ describe('API Tests', () => {
 
             expect(response.status).toBe(200)
             const gameObject = response.body.data as GameObject
+            const board = BoardObject.fromMoves(gameObject.moves)
             expect(gameObject._id).toEqual(testGameID)
-            expect(gameObject.turn).toEqual("w")
+            expect(board.turn).toEqual("w")
             expect(gameObject.player_w).toEqual(testUsername)
             expect(gameObject.player_b).toEqual('Test_User')
             expect(gameObject.winner).toBeNull()
-            expect(gameObject.board.length).toBe(64)
+            expect(board.toString().length).toBe(64)
 
             // Re-connect as the game creator
             const response1 = await supertest(ExpressApp)
@@ -445,12 +452,13 @@ describe('API Tests', () => {
 
             expect(response1.status).toBe(200)
             const gameObject1 = response.body.data as GameObject
+            const board1 = BoardObject.fromMoves(gameObject.moves)
             expect(gameObject1._id).toEqual(testGameID)
-            expect(gameObject1.turn).toEqual("w")
+            expect(board1.turn).toEqual("w")
             expect(gameObject1.player_w).toEqual(testUsername)
             expect(gameObject1.player_b).toEqual('Test_User')
             expect(gameObject1.winner).toBeNull()
-            expect(gameObject1.board.length).toBe(64)
+            expect(board1.toString().length).toBe(64)
 
             await Services.deleteUser(otherUserToken, 'Test_User')
             await Services.deleteGame(testGameID)
@@ -458,7 +466,7 @@ describe('API Tests', () => {
 
         it('Make a move on remote game invalid turn', async () => {
             const otherUserToken = await Services.createUser('Test_User', 'Test_Password')
-            await Services.createGame(testToken, testGameID, 'Test_User')
+            await Services.createGame(testToken, testGameID, true, 'Test_User')
 
             const response = await supertest(ExpressApp)
                 .get(resources.games + `/makemove?id=${testGameID}&move=pb2b4`)
@@ -474,7 +482,7 @@ describe('API Tests', () => {
 
         it('Make a move on remote game valid turn', async () => {
             const otherUserToken = await Services.createUser('Test_User', 'Test_Password')
-            await Services.createGame(testToken, testGameID, 'Test_User')
+            await Services.createGame(testToken, testGameID, true, 'Test_User')
 
             const response = await supertest(ExpressApp)
                 .get(resources.games + `/makemove?id=${testGameID}&move=pb2b4`)
@@ -483,10 +491,11 @@ describe('API Tests', () => {
 
             expect(response.status).toBe(200)
             const updatedGameObject = response.body.data as GameObject
+            const board = BoardObject.fromMoves(updatedGameObject.moves)
             expect(updatedGameObject._id).toEqual(testGameID)
-            expect(updatedGameObject.turn).toEqual("b")
+            expect(board.turn).toEqual("b")
             expect(updatedGameObject.winner).toBeNull()
-            expect(updatedGameObject.board).toBe('rnbqkbnrpppppppp                 P              P PPPPPPRNBQKBNR')
+            expect(board.toString()).toBe('rnbqkbnrpppppppp                 P              P PPPPPPRNBQKBNR')
 
             // Get updated game as player_black
             const getRemoteGameBlack = await supertest(ExpressApp)
@@ -495,11 +504,12 @@ describe('API Tests', () => {
                 .set('Authorization', 'Bearer ' + otherUserToken)
 
             expect(getRemoteGameBlack.status).toBe(200)
-            const updatedGameObjectB = getRemoteGameBlack.body.data
+            const updatedGameObjectB: GameObject = getRemoteGameBlack.body.data
+            const board1 = BoardObject.fromMoves(updatedGameObject.moves)
             expect(updatedGameObjectB._id).toEqual(testGameID)
-            expect(updatedGameObjectB.turn).toEqual("b")
+            expect(board1.turn).toEqual("b")
             expect(updatedGameObjectB.winner).toBeNull()
-            expect(updatedGameObjectB.board).toBe('rnbqkbnrpppppppp                 P              P PPPPPPRNBQKBNR')
+            expect(board1.toString()).toBe('rnbqkbnrpppppppp                 P              P PPPPPPRNBQKBNR')
 
             await Services.deleteUser(otherUserToken, 'Test_User')
             await Services.deleteGame(testGameID)

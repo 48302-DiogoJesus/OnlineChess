@@ -1,13 +1,32 @@
 import CONFIG from '../config'
 import mongoose from 'mongoose';
 
-export const connectionURL = CONFIG.MONGO_DB.REMOTE ?
-    `mongodb+srv://${CONFIG.MONGO_DB.USERNAME}:${CONFIG.MONGO_DB.PASSWORD}@mycluster.h5qxe.mongodb.net/${CONFIG.MONGO_DB.DB_NAME}?retryWrites=true&w=majority`
-    :
-    `mongodb://127.0.0.1:27017/${CONFIG.MONGO_DB.DB_NAME}`
+export function connectMongoDB() {
+    var db_name = CONFIG.TEST_ENV
+        ? CONFIG.MONGO_DB.TEST_DB_NAME
+        : CONFIG.MONGO_DB.DB_NAME
+
+    const connectionURL = CONFIG.MONGO_DB.REMOTE ?
+        `mongodb+srv://${CONFIG.MONGO_DB.USERNAME}:${CONFIG.MONGO_DB.PASSWORD}@mycluster.h5qxe.mongodb.net/${db_name}?retryWrites=true&w=majority`
+        :
+        `mongodb://127.0.0.1:27017/${db_name}`
+
+    return mongoose.connect(connectionURL)
+}
+
+import Game from './schemas/game'
+import UserToken from './schemas/userToken'
+import UserPublic from './schemas/userPublic'
+import UserAuthentication from './schemas/userAuthentication'
 
 
-mongoose.connect(connectionURL)
+// ! DANGEROUS
+export async function clearDatabase() {
+    await Game.deleteMany({})
+    await UserToken.deleteMany({})
+    await UserPublic.deleteMany({})
+    await UserAuthentication.deleteMany({})
+}
 
 export async function executeInDB(block: (...args: any[]) => any) {
     let result

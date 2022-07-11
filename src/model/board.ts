@@ -19,7 +19,6 @@ import ERROR from '../errors/errors'
 export const BOARD_WIDTH = 8;
 export const BOARD_HEIGHT = 8;
 
-
 /**
  * Board Object
  * Representation of a board and all it's permitted operations
@@ -223,6 +222,21 @@ export class BoardObject {
     return false
   }
 
+  isPromotionMove = (moveAsString: string) => {
+    const move = stringToMove(moveAsString)
+    const piece = this.getPieceAt(move.start)
+    if (!(piece instanceof Pawn)) {
+      return false
+    }
+    if (this.turn == PieceColor.WHITE && move.end.row == 0) {
+      return true
+    }
+    if (this.turn == PieceColor.BLACK && move.end.row == 7) {
+      return true
+    }
+    return false
+  }
+
   makeMove = (moveAsString: string) => {
     const move = stringToMove(moveAsString)
     const maybePromotionPiece = charToPiece(selectByPieceColor(this.turn, move.pieceChar.toUpperCase(), move.pieceChar.toLowerCase()))!!
@@ -235,13 +249,17 @@ export class BoardObject {
 
     if (piece === null) throw ERROR.NO_PIECE_AT_START_POSITION
 
+    /*
     if (!(piece instanceof King) && this.isInCheck()) {
       throw ERROR.KING_IN_CHECK
     }
+    */
+
+    const isPromotion = maybePromotionPiece.toString().toUpperCase() != piece.toString().toUpperCase()
 
     if (
       // When true means Promotion
-      maybePromotionPiece.toString().toUpperCase() != piece.toString().toUpperCase() &&
+      isPromotion &&
       // Check if it is a Pawn and if it's not a game winning move
       (piece instanceof Pawn) && !(capturePiece instanceof King) &&
       // Check if it's valid promotion piece
@@ -314,41 +332,3 @@ export class BoardObject {
     }
   }
 }
-
-/**
- * String to Board
- * Convert a string to a board
- * If a char corresponds to a valid piece set that piece in the {newBoard}, if not set an empty Tile in the {newBoard}
- * @param {boardAsString} Example of a default board: "rnbqkbnrpppppppp                                PPPPPPPPRNBQKBNR"
- * @returns A new BoardObject if {boardAsString} is convertible to a board, null if not
- */
-/* export function stringToBoard(boardAsString: string, initTurn: PieceColor | null = null): BoardObject {
-  if (boardAsString.length != BOARD_WIDTH * BOARD_HEIGHT)
-    throw ERROR.BAD_BOARD_STRING
-
-  var blackHasKing = false
-  var whiteHasKing = false
-
-  const newBoard = new BoardObject(initTurn, false)
-  for (let row = 0, currChar = 0; row < BOARD_HEIGHT; row++) {
-    for (let col = 0; col < BOARD_WIDTH; col++, currChar++) {
-      const pieceChar = boardAsString[currChar]
-      const piece: Piece | null = charToPiece(pieceChar)
-      if (piece instanceof King) {
-        if (piece.color == PieceColor.WHITE) {
-          whiteHasKing = true
-        } else if (piece.color == PieceColor.BLACK) {
-          blackHasKing = true
-        }
-      }
-      // [piece] will be null if char does not correspond to a piece. Case of the " " representing an empty Tile
-      newBoard.setPieceAt(Position(col, row), piece)
-    }
-  }
-  if (!blackHasKing)
-    newBoard.winner = PieceColor.WHITE
-  if (!whiteHasKing)
-    newBoard.winner = PieceColor.BLACK
-  return newBoard
-}
- */

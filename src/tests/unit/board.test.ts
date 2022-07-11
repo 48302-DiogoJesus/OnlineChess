@@ -1,7 +1,7 @@
 import { Move, moveToString, Position, positionToString, stringToMove, stringToPosition } from "../../model/position"
 import ERRORS, { ErrorObject } from '../../errors/errors'
 import { Bishop, charToPiece, King, Knight, MoveState, Pawn, Piece, PieceColor, pieceToChar, Queen, Rook } from "../../model/piece"
-import { BoardObject, stringToBoard } from "../../model/board"
+import { BoardObject } from "../../model/board"
 
 describe('Board Game Tests', () => {
 
@@ -205,6 +205,7 @@ describe('Board Game Tests', () => {
             expect(board.getPieceAt(stringToPosition("a3"))?.toString()).toBe((new Knight(PieceColor.WHITE).toString()))
         })
 
+        /* 
         test('Test king in check', () => {
             const board = new BoardObject()
 
@@ -227,7 +228,7 @@ describe('Board Game Tests', () => {
             expect(board.turn).toBe(PieceColor.BLACK)
             expect(board.isInCheckMate()).toBe(true)
         })
-
+        */
         test('Test eating king', () => {
             const board = new BoardObject()
 
@@ -278,25 +279,6 @@ describe('Board Game Tests', () => {
             const board = new BoardObject()
             board.makeMove("pb2b4")
             expect(board.toString()).toBe('rnbqkbnrpppppppp                 P              P PPPPPPRNBQKBNR')
-        })
-
-        test('Valid String to Board', () => {
-            const board = stringToBoard("rnbqkbnrppKppppp                                P PPPPPPRNBQKBNR")
-            expect(board?.getPieceAt(stringToPosition("c7"))?.toString()).toBe("K")
-            expect(board?.getPieceAt(stringToPosition("b2"))).toBeNull()
-            expect(board?.getPieceAt(stringToPosition("a2"))?.toString()).toBe("P")
-        })
-
-        test('Invalid String to Board', () => {
-            expect(expectThrow(stringToBoard, "dfgdfa")!!.message).toBe(ERRORS.BAD_BOARD_STRING.message)
-        })
-
-        test('String to Board to String to board', () => {
-            const board = stringToBoard("rnbqkbnrpppppppP                                P PPPPPPRNBQKBNR")!!
-            board.makeMove("pc2c4")
-            expect(board?.getPieceAt(stringToPosition("c4"))?.toString()).toBe("P")
-            expect(board?.getPieceAt(stringToPosition("h7"))?.toString()).toBe("P")
-            expect(board.toString()).toBe('rnbqkbnrpppppppP                  P             P  PPPPPRNBQKBNR')
         })
     })
 })

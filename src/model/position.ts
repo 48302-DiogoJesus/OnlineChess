@@ -1,9 +1,8 @@
-import { 
-    BOARD_HEIGHT, 
-    BOARD_WIDTH 
-} from './board'
 import ERRORS from '../errors/errors'
 import { charToPiece } from './piece';
+
+const BOARD_HEIGHT = 8
+const BOARD_WIDTH = 8
 
 export function range(x: number, min: number, max: number) {
     return x >= min && x <= max;
@@ -25,12 +24,12 @@ export function positionToString(position: PositionObject): string {
 }
 
 export function stringToPosition(string: string): PositionObject {
-    if (string.length != 2) 
+    if (string.length != 2)
         throw ERRORS.INVALID_POSITION_CONVERSION
 
     const column = string.charCodeAt(0) - 'a'.charCodeAt(0)
     const row = ('0'.charCodeAt(0) + BOARD_HEIGHT) - string.charCodeAt(1)
-    
+
     if (!range(column, 0, BOARD_WIDTH - 1) || !range(row, 0, BOARD_HEIGHT - 1))
         throw ERRORS.INVALID_POSITION_CONVERSION
 
@@ -46,10 +45,10 @@ export function stringToPosition(string: string): PositionObject {
  */
 export const Position = (column: number, row: number): PositionObject => {
     return { column, row }
-} 
+}
 
 export interface MoveObject {
-    pieceChar: string, 
+    pieceChar: string,
     start: PositionObject,
     end: PositionObject
 }
@@ -63,11 +62,11 @@ export interface MoveObject {
  * @returns a new move object
 */
 export const Move = (pieceChar: string, start: PositionObject, end: PositionObject): MoveObject => {
-    return { pieceChar, start, end}
-} 
+    return { pieceChar, start, end }
+}
 
 export function stringToMove(string: string) {
-    if (string.length != 5) 
+    if (string.length != 5)
         throw ERRORS.INVALID_MOVE_CONVERSION
 
     const piece = string[0]

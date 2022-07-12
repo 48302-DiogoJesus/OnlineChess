@@ -6,7 +6,7 @@ if (!PROD)
 
 const config = {
     // Change when deploying to process.env.PORT || 8080
-    SERVER_PORT: 8888,
+    SERVER_PORT: process.env.PORT || 8888,
     TEST_ENV: false,
     MONGO_DB: {
         DB_NAME: 'OnlineChess',

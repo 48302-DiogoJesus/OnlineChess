@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.stringToBoard = exports.BoardObject = exports.BOARD_HEIGHT = exports.BOARD_WIDTH = void 0;
+exports.BoardObject = exports.BOARD_HEIGHT = exports.BOARD_WIDTH = void 0;
 const piece_1 = require("./piece");
 const position_1 = require("./position");
 const errors_1 = __importDefault(require("../errors/errors"));
@@ -19,10 +19,11 @@ class BoardObject {
      * @param {initBoard} If true it will initialize this.board with pieces at default positions (true by default)
      * @returns A new instance of BoardObject
      */
-    constructor(initBoard = true) {
+    constructor(initTurn = null, initBoard = true) {
         this.board = Array(exports.BOARD_HEIGHT).fill(null).map(() => Array(exports.BOARD_WIDTH).fill(null));
         this.winner = null;
         this.turn = piece_1.PieceColor.WHITE;
+        this.moves = [];
         /**
          * Set Piece At
          * Set a piece at a certain board position
@@ -80,12 +81,26 @@ class BoardObject {
                     const piece = this.getPieceAt(piecePosition);
                     if (piece != null && piece.color == (0, piece_1.getOpponent)(this.turn)) {
                         const possibleMovesForPiece = this.generateAllPossibleTargets(piecePosition);
-                        for (const move of possibleMovesForPiece) {
+                        possibleMovesForPiece.forEach(move => {
                             if (move.column === kingPosition.column && move.row === kingPosition.row)
                                 return true;
-                        }
+                        });
                     }
                 }
+            }
+            return false;
+        };
+        this.isPromotionMove = (moveAsString) => {
+            const move = (0, position_1.stringToMove)(moveAsString);
+            const piece = this.getPieceAt(move.start);
+            if (!(piece instanceof piece_1.Pawn)) {
+                return false;
+            }
+            if (this.turn == piece_1.PieceColor.WHITE && move.end.row == 0) {
+                return true;
+            }
+            if (this.turn == piece_1.PieceColor.BLACK && move.end.row == 7) {
+                return true;
             }
             return false;
         };
@@ -94,17 +109,20 @@ class BoardObject {
             const maybePromotionPiece = (0, piece_1.charToPiece)((0, piece_1.selectByPieceColor)(this.turn, move.pieceChar.toUpperCase(), move.pieceChar.toLowerCase()));
             const piece = this.getPieceAt(move.start);
             const capturePiece = this.getPieceAt(move.end);
-            if (this.winner !== null) {
+            if (this.winner != null) {
                 throw errors_1.default.ALREADY_OVER;
             }
             if (piece === null)
                 throw errors_1.default.NO_PIECE_AT_START_POSITION;
-            if (!(piece instanceof piece_1.King) && this.isInCheck()) {
-                throw errors_1.default.KING_IN_CHECK;
+            /*
+            if (!(piece instanceof King) && this.isInCheck()) {
+              throw ERROR.KING_IN_CHECK
             }
+            */
+            const isPromotion = maybePromotionPiece.toString().toUpperCase() != piece.toString().toUpperCase();
             if (
             // When true means Promotion
-            maybePromotionPiece.toString().toUpperCase() != piece.toString().toUpperCase() &&
+            isPromotion &&
                 // Check if it is a Pawn and if it's not a game winning move
                 (piece instanceof piece_1.Pawn) && !(capturePiece instanceof piece_1.King) &&
                 // Check if it's valid promotion piece
@@ -119,12 +137,12 @@ class BoardObject {
             }
             if (piece instanceof piece_1.Pawn)
                 piece.hasMoved = true;
-            if (capturePiece instanceof piece_1.King)
-                this.winner = this.turn;
-            this.turn = (0, piece_1.getOpponent)(this.turn);
             // If this move makes the other player's King be in check and with nowhere to go tell board he won
             if (this.isInCheck() && this.generateSafeKingTargets().size === 0)
                 this.winner = (0, piece_1.getOpponent)(this.turn);
+            this.turn = (0, piece_1.getOpponent)(this.turn);
+            this.updateWinner();
+            this.moves.push(move);
         };
         /**
          * Set Board Row
@@ -143,6 +161,12 @@ class BoardObject {
         if (initBoard) {
             this.initBoard();
         }
+        if (initTurn != null) {
+            this.turn = initTurn;
+        }
+    }
+    stringMoves() {
+        return this.moves.map(move => (0, position_1.moveToString)(move));
     }
     /**
      * Initialize Board
@@ -156,6 +180,13 @@ class BoardObject {
         this.setRow("PPPPPPPP", exports.BOARD_HEIGHT - 2);
         this.setRow("RNBQKBNR", exports.BOARD_HEIGHT - 1);
     }
+    static fromMoves(moves) {
+        const baseBoard = new BoardObject();
+        for (const move of moves) {
+            baseBoard.makeMove(move);
+        }
+        return baseBoard;
+    }
     generateSafeKingTargets() {
         const kingPosition = this.findKingPosition();
         if (kingPosition == null)
@@ -166,7 +197,7 @@ class BoardObject {
         // Set that will store the suicide positions for the King
         const collisions = new Set();
         this.setPieceAt(kingPosition, null);
-        for (const target of possibleKingTargets) {
+        possibleKingTargets.forEach((target) => {
             // Remove King from the board to corretly make the predictions
             // For all the board pieces
             for (let row = 0; row < exports.BOARD_HEIGHT; row++) {
@@ -198,30 +229,41 @@ class BoardObject {
                             });
                         }
                         // Remove suicide targets
-                        for (const enemyTarget of possibleEnemyTargets) {
-                            for (const target of possibleKingTargets) {
+                        possibleEnemyTargets.forEach((enemyTarget) => {
+                            possibleKingTargets.forEach(target => {
                                 if (enemyTarget.column === target.column && enemyTarget.row === target.row)
                                     collisions.add(enemyTarget);
-                            }
-                        }
+                            });
+                        });
                     }
                     // Put target piece back again
                     this.setPieceAt(target, targetPiece);
                 }
             }
-        }
+        });
         // Put King back to the board after predicting enemy targets
         this.setPieceAt(kingPosition, new piece_1.King(this.turn));
         /*
          Remove from the King targets the suicide positions
          */
         possibleKingTargets.forEach((kingPos) => {
-            for (const collision of collisions) {
+            collisions.forEach(collision => {
                 if (collision.column === kingPos.column && collision.row === kingPos.row)
                     possibleKingTargets.delete(kingPos);
-            }
+            });
         });
         return possibleKingTargets;
+    }
+    updateWinner() {
+        if (this.findKingPosition() == null) {
+            this.winner = (0, piece_1.getOpponent)(this.turn);
+        }
+        const backupTurn = this.turn;
+        this.turn = (0, piece_1.getOpponent)(this.turn);
+        if (this.findKingPosition() == null) {
+            this.winner = (0, piece_1.getOpponent)(this.turn);
+        }
+        this.turn = backupTurn;
     }
     /**
      * Board to String
@@ -243,25 +285,3 @@ class BoardObject {
     }
 }
 exports.BoardObject = BoardObject;
-/**
- * String to Board
- * Convert a string to a board
- * If a char corresponds to a valid piece set that piece in the {newBoard}, if not set an empty Tile in the {newBoard}
- * @param {boardAsString} Example of a default board: "rnbqkbnrpppppppp                                PPPPPPPPRNBQKBNR"
- * @returns A new BoardObject if {boardAsString} is convertible to a board, null if not
- */
-function stringToBoard(boardAsString) {
-    if (boardAsString.length != exports.BOARD_WIDTH * exports.BOARD_HEIGHT)
-        throw errors_1.default.BAD_BOARD_STRING;
-    const newBoard = new BoardObject();
-    for (let row = 0, currChar = 0; row < exports.BOARD_HEIGHT; row++) {
-        for (let col = 0; col < exports.BOARD_WIDTH; col++, currChar++) {
-            const pieceChar = boardAsString[currChar];
-            const piece = (0, piece_1.charToPiece)(pieceChar);
-            // [piece] will be null if char does not correspond to a piece. Case of the " " representing an empty Tile
-            newBoard.setPieceAt((0, position_1.Position)(col, row), piece);
-        }
-    }
-    return newBoard;
-}
-exports.stringToBoard = stringToBoard;

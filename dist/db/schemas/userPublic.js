@@ -8,5 +8,8 @@ const { Schema } = mongoose_1.default;
 const userPublic = new Schema({
     _id: { type: String, required: true },
     rank: { type: String, required: true },
+    friends: { type: [String], required: false },
+    public_profile: { type: String, required: false },
+    invites: { type: [String], required: false }
 }, { collection: 'UsersPublic' });
 exports.default = mongoose_1.default.model("UserPublicSchema", userPublic);

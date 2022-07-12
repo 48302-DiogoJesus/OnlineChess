@@ -209,13 +209,16 @@ const charPieceMap = {
     'B': Bishop,
     'Q': Queen,
     'N': Knight,
-    'P': Pawn
+    'P': Pawn,
 };
 const charToPiece = (char) => {
     for (const entry of Object.entries(charPieceMap)) {
-        if (entry[0] === char.toUpperCase()) {
+        const pieceChar = entry[0];
+        const pieceClass = entry[1];
+        if (pieceChar === char.toUpperCase()) {
             const color = char === char.toUpperCase() ? PieceColor.WHITE : PieceColor.BLACK;
-            return new entry[1](color);
+            const newPiece = new pieceClass(color);
+            return newPiece;
         }
     }
     return null;

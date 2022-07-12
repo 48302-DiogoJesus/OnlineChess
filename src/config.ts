@@ -1,4 +1,4 @@
-require('dotenv').config()
+// require('dotenv').config()
 
 const config = {
     // Change when deploying to process.env.PORT || 8080

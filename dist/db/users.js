@@ -35,6 +35,8 @@ function validateUserName(username) {
     if (!(username.length >= 5 && username.length <= 20)) {
         throw errors_1.default.INVALID_USERNAME_LENGTH;
     }
+    if (username.includes(' '))
+        throw errors_1.default.INVALID_USERNAME_WS;
     /*
     if (!(/^[a-zA-Z0-9]+$/.test(username))) {
         throw ERRORS.INVALID_USERNAME_CHARACTERS
@@ -46,6 +48,8 @@ function validatePassword(password) {
     if (!(password.length >= 5 && password.length <= 20)) {
         throw errors_1.default.INVALID_PASSWORD_LENGTH;
     }
+    if (password.includes(' '))
+        throw errors_1.default.INVALID_PASSWORD_WS;
     /*
     if (!/[a-zA-Z0-9_-]* /.test(password)) {
         throw ERRORS.INVALID_PASSWORD_CHARACTERS
@@ -154,20 +158,13 @@ function validateCredentials(username, password) {
         const userCredentials = (yield userAuthentication_1.default.findById(username));
         if (userCredentials.password !== (0, md5_1.default)(password))
             throw errors_1.default.WRONG_PASSWORD;
-        return true;
+        return userCredentials.token;
     }));
 }
 exports.validateCredentials = validateCredentials;
 function getUsers() {
     return (0, common_1.executeInDB)(() => __awaiter(this, void 0, void 0, function* () {
-        const users = yield userPublic_1.default.find();
-        return users === null ? [] : users;
+        return yield userPublic_1.default.find();
     }));
 }
 exports.getUsers = getUsers;
-function t() {
-    return __awaiter(this, void 0, void 0, function* () {
-        console.log(yield getUsers());
-    });
-}
-t();

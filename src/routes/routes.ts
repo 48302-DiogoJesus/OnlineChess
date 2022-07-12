@@ -18,11 +18,9 @@ app.use((req, res, next) => {
     res.set('Access-Control-Allow-Credentials', 'true')
     next()
 })
-app.use(cors({
-    origin: "http://localhost:9999"
-}))
+app.use(cors())
 app.use(session({
-    secret: 'borga',
+    secret: 'chessbackend',
     resave: false,
     saveUninitialized: false
 }))

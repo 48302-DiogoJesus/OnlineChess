@@ -1,5 +1,5 @@
 // Enable before pushing to heroku
-const PROD = false
+const PROD = true
 
 if (!PROD)
     require('dotenv').config()

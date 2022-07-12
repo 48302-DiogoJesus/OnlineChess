@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const PROD = false
+const PROD = true
 
 const PROD_BACKEND_API_URL = 'https://chess-backend-api.herokuapp.com/api/'
 

@@ -5,20 +5,25 @@ import AuthRoutes from './auth'
 import UserRoutes from './users'
 
 import passport from 'passport'
+import CONFIG from '../config'
+
 const cors = require('cors')
 const session = require('express-session')
-
 
 passport.serializeUser((userInfo: any, done) => { done(null, userInfo) })
 passport.deserializeUser((userInfo: any, done) => { done(null, userInfo) })
 
 const app = Express()
 
+
 app.use((req, res, next) => {
+    res.set('Access-Control-Allow-Origin', '*')
     res.set('Access-Control-Allow-Credentials', 'true')
     next()
 })
-app.use(cors())
+app.use(cors({
+    origin: CONFIG.PROD ? "" : "*",
+}))
 app.use(session({
     secret: 'chessbackend',
     resave: false,

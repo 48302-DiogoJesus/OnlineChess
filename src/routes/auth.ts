@@ -1,4 +1,4 @@
-import { Router, Response, Request } from "express";
+import { Router, Response } from "express";
 import ERRORS from '../errors/errors'
 import { executeSafe, getToken } from "./common";
 import Services from "../services";
@@ -19,7 +19,11 @@ router.post('/', (req, res) => {
         }, (err) => {
             if (err) throw ERRORS.UNKNOWN_ERROR(500, err)
             // Login successfull
-            res.sendStatus(200)
+            res.status(200).json({
+                data: {
+                    token: userToken
+                }
+            })
         })
     })
 })

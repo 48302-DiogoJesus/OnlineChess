@@ -7,7 +7,7 @@ const config = {
     MONGO_DB: {
         DB_NAME: 'OnlineChess',
         TEST_DB_NAME: 'OnlineChessTest',
-        REMOTE: false,
+        REMOTE: true,
         USERNAME: process.env.MONGO_DB_USERNAME || null,
         PASSWORD: process.env.MONGO_DB_PASSWORD || null
     }

@@ -7,7 +7,7 @@ export default function GameButtons(
 ) {
   return (
     <div className="game-buttons">
-      {!props.gameOver ? <a className="game-buttons-forfeit">Forfeit</a> : null}
+      {/* {!props.gameOver ? <a className="game-buttons-forfeit">Forfeit</a> : null} */}
     </div>
   )
 }

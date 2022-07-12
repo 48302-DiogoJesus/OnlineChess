@@ -1,10 +1,6 @@
 import axios from 'axios'
 
-const PROD = true
-
-const PROD_BACKEND_API_URL = 'https://chess-backend-api.herokuapp.com/api/'
-
-const BACKEND_API_URL = PROD ? PROD_BACKEND_API_URL : `http://localhost:7000/api/`
+const BACKEND_API_URL = '/api/'
 
 const axiosI = axios.create({
     baseURL: BACKEND_API_URL,

@@ -1,4 +1,4 @@
-import ERRORS, { ErrorObject } from '../../errors/errors'
+import ERRORS from '../../errors/errors'
 import Services from '../../services'
 import supertest from 'supertest'
 import ExpressApp from '../../routes/routes'

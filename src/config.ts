@@ -1,4 +1,8 @@
-// require('dotenv').config()
+// Enable before pushing to heroku
+const PROD = true
+
+if (!PROD)
+    require('dotenv').config()
 
 const config = {
     // Change when deploying to process.env.PORT || 8080
@@ -12,5 +16,6 @@ const config = {
         PASSWORD: process.env.MONGO_DB_PASSWORD || null
     }
 }
+
 
 export default config;

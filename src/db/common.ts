@@ -7,10 +7,10 @@ export function connectMongoDB() {
         : CONFIG.MONGO_DB.DB_NAME
 
     const connectionURL = CONFIG.MONGO_DB.REMOTE ?
-        `mongodb+srv://${CONFIG.MONGO_DB.USERNAME}:${CONFIG.MONGO_DB.PASSWORD}@mycluster.h5qxe.mongodb.net/${db_name}?retryWrites=true&w=majority`
+        `mongodb+srv://${CONFIG.MONGO_DB.USERNAME}:${CONFIG.MONGO_DB.PASSWORD}@cluster0.fspkz.mongodb.net/${db_name}?retryWrites=true&w=majority`
         :
         `mongodb://127.0.0.1:27017/${db_name}`
-
+    console.log(connectionURL)
     return mongoose.connect(connectionURL)
 }
 

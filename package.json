@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "npm run build-all && npm run server",
     "server-dev": "nodemon src/app.ts",
     "react": "cd ./react-ui && npm start",
     "server": "node ./dist/app.js",

@@ -4,10 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm run build-all && npm run server",
+    "start": "node ./dist/app.js",
     "server-dev": "nodemon src/app.ts",
     "react": "cd ./react-ui && npm start",
-    "server": "node ./dist/app.js",
     "build-server": "tsc -p ./src",
     "build-react": "cd ./react-ui && npm run build",
     "build-all": "npm run build-server && npm run build-react",

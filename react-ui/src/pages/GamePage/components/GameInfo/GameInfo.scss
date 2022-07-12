@@ -1,0 +1,27 @@
+@import "../../global-css/common.scss";
+
+.game-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 480px;
+    min-width: 480px;
+    max-width: 480px;
+    height: 45px;
+    color: $dcolor;
+    padding: 5px;
+}
+
+.game-info-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .game-info-prop {
+        margin-right: 10px;
+    }
+
+    h4 {
+        font-size: 1.5rem;
+    }
+}

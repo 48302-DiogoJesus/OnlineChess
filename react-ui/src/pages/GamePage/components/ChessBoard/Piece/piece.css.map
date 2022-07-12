@@ -1,0 +1,9 @@
+{
+    "version": 3,
+    "mappings": "AAAA,AAAA,MAAM,CAAC;EACL,KAAK,EAAE,IAAI;EACX,MAAM,EAAE,IAAI;CAMb;;AARD,AAIE,MAJI,AAIH,MAAM,CAAC;EACN,MAAM,EAAE,OAAO;EACf,UAAU,EAAE,QAAQ;CACrB",
+    "sources": [
+        "piece.scss"
+    ],
+    "names": [],
+    "file": "piece.css"
+}

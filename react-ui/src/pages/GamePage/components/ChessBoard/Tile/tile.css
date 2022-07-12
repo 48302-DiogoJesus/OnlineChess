@@ -1,0 +1,40 @@
+.tile {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  min-width: 60px;
+  min-height: 60px;
+  max-width: 60px;
+  max-height: 60px;
+  -webkit-transition: all 0s;
+  transition: all 0s;
+}
+
+.tile.dark {
+  background-color: #769656;
+}
+
+.tile.target {
+  background-color: rgba(99, 196, 2, 0.5);
+}
+
+.tile.light {
+  background-color: #eeeed2;
+}
+
+.tile.selected {
+  background-color: #6ea13a;
+  -webkit-filter: saturate(1.5);
+          filter: saturate(1.5);
+}
+
+.tile:hover {
+  background-color: #6ea13a;
+}
+/*# sourceMappingURL=tile.css.map */

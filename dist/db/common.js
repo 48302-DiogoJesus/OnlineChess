@@ -20,9 +20,10 @@ function connectMongoDB() {
         ? config_1.default.MONGO_DB.TEST_DB_NAME
         : config_1.default.MONGO_DB.DB_NAME;
     const connectionURL = config_1.default.MONGO_DB.REMOTE ?
-        `mongodb+srv://${config_1.default.MONGO_DB.USERNAME}:${config_1.default.MONGO_DB.PASSWORD}@mycluster.h5qxe.mongodb.net/${db_name}?retryWrites=true&w=majority`
+        `mongodb+srv://${config_1.default.MONGO_DB.USERNAME}:${config_1.default.MONGO_DB.PASSWORD}@cluster0.fspkz.mongodb.net/${db_name}?retryWrites=true&w=majority`
         :
             `mongodb://127.0.0.1:27017/${db_name}`;
+    console.log("[DEBUG] DB Connection URI:", connectionURL);
     return mongoose_1.default.connect(connectionURL);
 }
 exports.connectMongoDB = connectMongoDB;

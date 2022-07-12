@@ -5,16 +5,15 @@ import AuthRoutes from './auth'
 import UserRoutes from './users'
 
 import passport from 'passport'
-import CONFIG from '../config'
 
 const cors = require('cors')
 const session = require('express-session')
+const path = require('path')
 
 passport.serializeUser((userInfo: any, done) => { done(null, userInfo) })
 passport.deserializeUser((userInfo: any, done) => { done(null, userInfo) })
 
 const app = Express()
-
 
 app.use((req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*')
@@ -32,8 +31,8 @@ app.use(passport.session())
 app.use(Express.urlencoded({ extended: true }))
 app.use(Express.json());
 
-app.use('/auth', AuthRoutes)
-app.use('/users', UserRoutes)
-app.use('/games', GamesRoutes)
+app.use('/api/auth', AuthRoutes)
+app.use('/api/users', UserRoutes)
+app.use('/api/games', GamesRoutes)
 
 export default app

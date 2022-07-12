@@ -1,0 +1,48 @@
+@import "../../global-css/common.scss";
+
+.global-container {
+  .game-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: $lcolor;
+    width: 835px;
+    border: 3px solid $dcolor;
+    border-radius: 10px;
+
+    .game-container-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 10px 0;
+    }
+
+    .separator {
+      height: 2px;
+      width: 100%;
+      background-color: $dcolor;
+      border: none;
+      opacity: 1;
+      margin: 28px;
+    }
+  }
+
+  .green-btn {
+    background-color: $dcolor;
+    color: $lcolor;
+    border: 0;
+    border-radius: 6px;
+    padding: 10px 20px;
+
+    &.restart {
+      padding: 5px 10px;
+      margin-left: 30px;
+    }
+  }
+}
+
+
+.singleplayer-piece-turn {
+  color: $dcolor;
+}

@@ -1,0 +1,17 @@
+.auth-button {
+  border: none;
+  border-radius: 8px;
+  padding: 13px 25px;
+  color: #c0b95e;
+  font-size: 1.3rem;
+  background-color: #1f2428;
+  -webkit-filter: drop-shadow(0px 3px 3px rgba(0, 0, 0, 0.4));
+          filter: drop-shadow(0px 3px 3px rgba(0, 0, 0, 0.4));
+}
+
+.auth-button:hover {
+  -webkit-box-shadow: 2px 2px 2px #1f2428;
+          box-shadow: 2px 2px 2px #1f2428;
+  cursor: pointer;
+}
+/*# sourceMappingURL=AuthButtons.css.map */

@@ -10,7 +10,8 @@ export function connectMongoDB() {
         `mongodb+srv://${CONFIG.MONGO_DB.USERNAME}:${CONFIG.MONGO_DB.PASSWORD}@cluster0.fspkz.mongodb.net/${db_name}?retryWrites=true&w=majority`
         :
         `mongodb://127.0.0.1:27017/${db_name}`
-    console.log(connectionURL)
+
+    console.log("[DEBUG] DB Connection URI:", connectionURL)
     return mongoose.connect(connectionURL)
 }
 

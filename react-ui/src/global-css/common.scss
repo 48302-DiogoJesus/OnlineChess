@@ -1,0 +1,23 @@
+@import "./Colors.scss";
+@import url("https://fonts.googleapis.com/css2?family=Signika&display=swap");
+
+* {
+  box-sizing: border-box;
+  transition: all 0.3s;
+}
+
+body {
+  font-family: "Signika", sans-serif !important;
+  font-size: 1.8rem;
+  background-color: $dcolor;
+  color: $lcolor;
+  margin: 0;
+  height: 100vh;
+}
+
+.global-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}

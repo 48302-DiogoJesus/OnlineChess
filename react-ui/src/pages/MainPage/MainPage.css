@@ -1,0 +1,94 @@
+@import url("https://fonts.googleapis.com/css2?family=Signika&display=swap");
+* {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  -webkit-transition: all 0.3s;
+  transition: all 0.3s;
+}
+
+body {
+  font-family: "Signika", sans-serif !important;
+  font-size: 1.8rem;
+  background-color: #1f2428;
+  color: #c0b95e;
+  margin: 0;
+  height: 100vh;
+}
+
+.global-container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+.navbar3 {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  min-width: 99vw;
+  background-color: #c0b95e;
+  color: #1f2428;
+}
+
+.navbar3 .nav-container {
+  min-width: 33%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 5px;
+  height: 60px;
+  overflow: hidden;
+}
+
+.navbar3 .nav-left {
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+}
+
+.navbar3 .nav-center {
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+.navbar3 .nav-right {
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+
+.container.main-page-contents {
+  margin-top: 30px;
+}
+
+.container .row {
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+.container .open-game-outer-container {
+  max-width: 40%;
+  min-width: 350px;
+}
+/*# sourceMappingURL=MainPage.css.map */

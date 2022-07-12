@@ -1,0 +1,21 @@
+.main-page-navbar {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 20px;
+  height: 70px;
+  background-color: #c0b95e;
+}
+
+.main-page-navbar .main-page-header {
+  font-size: 2.2rem;
+  color: #1f2428;
+  margin: 0;
+}
+/*# sourceMappingURL=Navbar.css.map */

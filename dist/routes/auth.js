@@ -30,7 +30,11 @@ router.post('/', (req, res) => {
             if (err)
                 throw errors_1.default.UNKNOWN_ERROR(500, err);
             // Login successfull
-            res.sendStatus(200);
+            res.status(200).json({
+                data: {
+                    token: userToken
+                }
+            });
         });
     }));
 });

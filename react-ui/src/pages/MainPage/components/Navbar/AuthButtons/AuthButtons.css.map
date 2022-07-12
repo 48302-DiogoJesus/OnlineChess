@@ -1,0 +1,10 @@
+{
+    "version": 3,
+    "mappings": "AAEA,AAAA,YAAY,CAAC;EACT,MAAM,EAAE,IAAI;EACZ,aAAa,EAAE,GAAG;EAClB,OAAO,EAAE,SAAS;EAClB,KAAK,ECLA,OAAO;EDMZ,SAAS,EAAE,MAAM;EACjB,gBAAgB,ECRX,OAAO;EDUZ,MAAM,EAAE,2CAA0C;CAMrD;;AAdD,AAUI,YAVQ,AAUP,MAAM,CAAC;EACJ,UAAU,EAAE,GAAG,CAAC,GAAG,CAAC,GAAG,CCbtB,OAAO;EDcR,MAAM,EAAE,OAAO;CAClB",
+    "sources": [
+        "AuthButtons.scss",
+        "../../global-css/Colors.scss"
+    ],
+    "names": [],
+    "file": "AuthButtons.css"
+}

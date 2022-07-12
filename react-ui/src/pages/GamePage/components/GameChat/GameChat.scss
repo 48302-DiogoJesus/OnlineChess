@@ -1,0 +1,76 @@
+@import "../../global-css/common.scss";
+
+.game-chat-container {
+  margin: 10px;
+  border: 3px solid $dcolor;
+  border-radius: 4px;
+}
+
+.game-chat {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  min-height: 480px;
+  max-height: 480px;
+  width: 300px;
+  min-width: 300px;
+  max-width: 300px;
+  background-color: $dcolor;
+  color: $lcolor;
+  overflow: hidden;
+}
+
+.game-chat-messages {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  max-width: 85%;
+  min-width: 85%;
+  max-height: 70%;
+  min-height: 70%;
+  overflow-y: auto;
+  list-style: none;
+  margin: 15px;
+  padding: 0;
+}
+
+.game-chat-message {
+  min-width: 95%;
+  max-width: 95%;
+  min-height: 40px;
+  background-color: $lcolor;
+  color: $dcolor;
+  padding: 10px;
+  margin: 8px 3px;
+  opacity: 0.85;
+  text-align: right;
+  border-radius: 7px 0;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.game-chat-input {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 95%;
+  min-height: 40px;
+  max-height: 40px;
+  margin: 8px;
+}
+
+.game-chat-input input {
+  min-height: 30px;
+  max-height: 30px;
+  min-width: 95%;
+  padding: 7px;
+  background-color: $lcolor;
+  color: $dcolor;
+  border: 0;
+  text-align: center;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+}

@@ -1,0 +1,46 @@
+.dropdown-menu {
+  margin-top: 20px;
+  max-width: 110px;
+  min-width: 110px;
+  height: 100px;
+  background-color: #1f2428;
+  padding: 0;
+}
+
+.dropdown-menu .inner-container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  margin-right: 10px;
+  background-color: #1f2428;
+  max-width: 110px;
+  height: 100px;
+}
+
+.dropdown-menu .inner-container .btn {
+  background-color: #1f2428;
+  border: 2px solid #c0b95e;
+  color: #c0b95e;
+  border-radius: 0px;
+  margin: 0;
+  min-width: 110px;
+  max-width: 110px;
+  height: 50px;
+}
+
+.dropdown-menu .inner-container .btn:hover {
+  cursor: pointer;
+  background-color: #c0b95e;
+  color: #1f2428;
+}
+/*# sourceMappingURL=PlayerMenu.css.map */

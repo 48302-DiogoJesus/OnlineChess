@@ -1,0 +1,40 @@
+.swal-modal {
+  background-color: #1f2428;
+  border: 3px solid #c0b95e;
+}
+
+.swal-modal .swal-title,
+.swal-modal .swal-text {
+  color: #c0b95e;
+  text-align: center;
+}
+
+.swal-modal .swal-title {
+  font-size: 3.4rem;
+}
+
+.swal-modal .swal-text {
+  font-size: 2rem;
+}
+
+.swal-modal .swal-button {
+  background-color: #1f2428;
+  color: #c0b95e;
+  border: 2px solid #c0b95e;
+  opacity: 0.8;
+}
+
+.swal-modal .swal-button:hover {
+  background-color: #c0b95e;
+  color: #1f2428;
+}
+
+.swal-modal .swal-footer {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+/*# sourceMappingURL=sweetalert.css.map */

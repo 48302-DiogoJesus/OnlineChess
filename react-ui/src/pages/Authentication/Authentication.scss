@@ -1,0 +1,91 @@
+@import "../../global-css/common.scss";
+
+.global-container {
+  height: 99vh;
+
+  .auth-container {
+    min-width: 300px;
+    max-width: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    border: 5px solid $lcolor;
+    border-radius: 20px 0;
+    padding: 20px 0;
+    box-shadow: 0 4px 4px black;
+
+    &:hover {
+      box-shadow: 0 6px 6px black;
+    }
+
+    form {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      width: 80%;
+
+      label {
+        font-size: 1.5rem;
+        margin: 5px 0;
+        text-shadow: 1.5px 1.5px black;
+        letter-spacing: 2px;
+      }
+
+      .auth-input {
+        margin: 15px;
+        background-color: $lcolor;
+        border: 0;
+        height: 30px;
+        width: 90%;
+        border-radius: 6px;
+        box-shadow: 0 4px 4px black;
+        outline: none;
+        padding: 0 10px;
+        text-align: center;
+        font-size: 1.45rem;
+        letter-spacing: 1.5px;
+        color: $dcolor;
+
+        &:focus {
+          filter: saturate(1.4);
+        }
+      }
+
+      #auth-button {
+        margin: 15px;
+        padding: 10px 30px;
+        background-color: $dcolor;
+        color: $lcolor;
+        border: 2px solid $lcolor;
+        border-radius: 7px;
+        font-size: 1.2rem;
+        letter-spacing: 3.5px;
+        text-align: center;
+        width: 60%;
+
+        &:hover {
+          cursor: pointer;
+          background-color: $lcolor;
+          color: $dcolor;
+          box-shadow: 0 7px 7px black;
+        }
+      }
+
+      .signup-link,
+      .login-link {
+        text-decoration: none;
+        color: $lcolor;
+        font-size: 1.35rem;
+        text-align: center;
+        margin-top: 5px;
+        margin-bottom: 10px;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}

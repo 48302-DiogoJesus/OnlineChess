@@ -1,0 +1,24 @@
+@import "../../global-css/common.scss";
+
+.game-vs {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 480px;
+    min-width: 480px;
+    max-width: 480px;
+    height: 45px;
+    color: $dcolor;
+}
+
+.game-vs-vs {
+    font-size: 2.5rem;
+}
+
+.game-vs-username {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-size: 2.3rem;
+}

@@ -1,0 +1,26 @@
+@import "../../global-css/common.scss";
+
+
+.game-buttons {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    min-width: 326px;
+    max-width: 326px;
+}
+
+
+.game-buttons-forfeit {
+    padding: 5px 20px;
+    border: 2px solid $dcolor;
+    opacity: .85;
+    text-decoration: none;
+    background-color: #C61010;
+    color: $dcolor  !important;
+
+    &:hover {
+        cursor: pointer;
+        opacity: 1;
+        text-decoration: none;
+    }
+}

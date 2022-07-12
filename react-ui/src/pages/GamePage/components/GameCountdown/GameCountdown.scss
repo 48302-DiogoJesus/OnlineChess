@@ -1,0 +1,29 @@
+@import "../../global-css/common.scss";
+
+.game-countdown {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 326px;
+  min-width: 326px;
+  max-width: 326px;
+  background-color: $lcolor;
+  color: $dcolor;
+}
+
+.time-left {
+  margin: 7px;
+  font-size: 1.4rem;
+}
+
+.time-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 3px solid $dcolor;
+  padding: 6px 10px;
+  font-size: 2rem;
+  min-width: 130px;
+  max-width: 130px;
+}

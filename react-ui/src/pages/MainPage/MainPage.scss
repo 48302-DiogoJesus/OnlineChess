@@ -1,0 +1,48 @@
+@import "../../global-css/common.scss";
+
+// NAVBAR WITH 3 SECTIONS. Usage: class="nav-container nav-left" inside a class="navbar3"
+.navbar3 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 99vw;
+  background-color: $lcolor;
+  color: $dcolor;
+
+  .nav-container {
+    min-width: 33%;
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    height: 60px;
+    overflow: hidden;
+  }
+
+  .nav-left {
+    justify-content: flex-start;
+  }
+
+  .nav-center {
+    justify-content: center;
+  }
+
+  .nav-right {
+    justify-content: flex-end;
+  }
+}
+
+.container {
+
+  &.main-page-contents {
+    margin-top: 30px;
+  }
+
+  .row {
+    justify-content: center;
+  }
+
+  .open-game-outer-container {
+    max-width: 40%;
+    min-width: 350px;
+  }
+}

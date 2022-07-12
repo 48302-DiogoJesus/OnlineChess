@@ -1,0 +1,78 @@
+.open-game-inner-container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  border: 2px solid rgba(192, 185, 94, 0.45);
+  border-radius: 20px;
+  padding: 20px 0;
+  min-height: 300px;
+}
+
+.open-game-inner-container .header {
+  margin-bottom: 25px;
+}
+
+.open-game-inner-container .entry {
+  width: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  margin: 5px 0;
+}
+
+.open-game-inner-container .entry .key {
+  margin: 8px 20px;
+}
+
+.open-game-inner-container .entry .value {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  margin: 8px 20px;
+}
+
+.open-game-inner-container .open-game-btn {
+  background-color: #c0b95e;
+  border-color: #c0b95e;
+  color: #1f2428;
+  border: none;
+  border-radius: 5px;
+  margin: 10px;
+  padding: 7px 40px;
+}
+
+.open-game-inner-container .open-game-btn:hover {
+  background-color: rgba(192, 185, 94, 0.85);
+  -webkit-filter: drop-shadow(1s0px 10px 10px rgba(0, 0, 0, 0.4));
+          filter: drop-shadow(1s0px 10px 10px rgba(0, 0, 0, 0.4));
+}
+
+.open-game-inner-container .game-id {
+  background-color: #1f2428;
+  border-color: #c0b95e;
+  padding: 10px 20px;
+  color: #c0b95e;
+}
+/*# sourceMappingURL=OpenSPGame.css.map */

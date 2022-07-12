@@ -125,7 +125,7 @@ class King extends Piece {
             const absoluteColumn = Math.abs(move.start.column - move.end.column);
             return absoluteRow <= 1 && absoluteColumn <= 1;
         };
-        this.toString = () => (0, exports.pieceToChar)(this);
+        this.toString = () => this.color == PieceColor.WHITE ? 'K' : 'k';
         this.color = pieceColor;
     }
 }
@@ -136,7 +136,7 @@ class Rook extends Piece {
         this.validPath = (move, board) => {
             return move.start.column == move.end.column || move.start.row == move.end.row;
         };
-        this.toString = () => (0, exports.pieceToChar)(this);
+        this.toString = () => this.color == PieceColor.WHITE ? 'R' : 'r';
         this.color = pieceColor;
     }
 }
@@ -147,7 +147,7 @@ class Bishop extends Piece {
         this.validPath = (move, board) => {
             return Math.abs(move.start.column - move.end.column) == Math.abs(move.start.row - move.end.row);
         };
-        this.toString = () => (0, exports.pieceToChar)(this);
+        this.toString = () => this.color == PieceColor.WHITE ? 'B' : 'b';
         this.color = pieceColor;
     }
 }
@@ -160,7 +160,7 @@ class Queen extends Piece {
                 || move.start.column == move.end.column
                 || Math.abs(move.start.row - move.end.row) == Math.abs(move.start.column - move.end.column);
         };
-        this.toString = () => (0, exports.pieceToChar)(this);
+        this.toString = () => this.color == PieceColor.WHITE ? 'Q' : 'q';
         this.color = pieceColor;
     }
 }
@@ -172,7 +172,7 @@ class Knight extends Piece {
             return Math.abs(move.end.column - move.start.column) == 2 && Math.abs(move.end.row - move.start.row) == 1
                 || Math.abs(move.end.column - move.start.column) == 1 && Math.abs(move.end.row - move.start.row) == 2;
         };
-        this.toString = () => (0, exports.pieceToChar)(this);
+        this.toString = () => this.color == PieceColor.WHITE ? 'N' : 'n';
         this.color = pieceColor;
     }
 }
@@ -198,7 +198,7 @@ class Pawn extends Piece {
                         && move.end.row - move.start.row == direction
                         && board.getPieceAt(move.end) != null);
         };
-        this.toString = () => (0, exports.pieceToChar)(this);
+        this.toString = () => this.color == PieceColor.WHITE ? 'P' : 'p';
         this.color = pieceColor;
     }
 }
@@ -212,11 +212,12 @@ const charPieceMap = {
     'P': Pawn,
 };
 const charToPiece = (char) => {
+    const charUpper = char.toUpperCase();
+    const color = char === char.toUpperCase() ? PieceColor.WHITE : PieceColor.BLACK;
     for (const entry of Object.entries(charPieceMap)) {
         const pieceChar = entry[0];
         const pieceClass = entry[1];
-        if (pieceChar === char.toUpperCase()) {
-            const color = char === char.toUpperCase() ? PieceColor.WHITE : PieceColor.BLACK;
+        if (pieceChar === charUpper) {
             const newPiece = new pieceClass(color);
             return newPiece;
         }

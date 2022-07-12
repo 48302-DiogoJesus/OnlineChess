@@ -1,0 +1,13 @@
+@import '../../../global-css/common.scss';
+
+.board {
+  border: 3px solid $dcolor;
+  border-radius: 3px;
+}
+
+.board-row {
+  display: flex;
+  max-height: 80px;
+  // Space for 8 Tiles (each has 80px width and height)
+  max-width: calc(8 * 80px);
+}

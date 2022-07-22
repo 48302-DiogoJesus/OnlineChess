@@ -1,9 +1,7 @@
 import axios from 'axios'
 
-const BACKEND_API_URL = '/api/'
-
 const axiosI = axios.create({
-    baseURL: BACKEND_API_URL,
+    baseURL: '/api/',
     /*
     headers: {
         'Access-Control-Allow-Origin': '*',
@@ -14,7 +12,6 @@ const axiosI = axios.create({
 })
 
 const config = {
-    SERVER_URL: BACKEND_API_URL,
     AXIOSINSTANCE: axiosI
 }
 

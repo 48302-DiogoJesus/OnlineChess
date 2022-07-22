@@ -1,4 +1,4 @@
-@import "../../../global-css/Colors";
+@import "../../../../../global-css/Colors.scss";
 
 .tile {
   display: flex;
@@ -26,6 +26,14 @@
   &.selected {
     background-color: $stile;
     filter: saturate(1.5);
+  }
+
+  &.lastmove {
+    background-color: $lastmovetile;
+  }
+
+  &.targetpiece {
+    background-color: $tptile;
   }
 
   &:hover {

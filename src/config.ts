@@ -1,8 +1,9 @@
 // Enable before pushing to heroku
 const PROD = true
 
-if (!PROD)
+try {
     require('dotenv').config()
+} catch (e) { }
 
 const config = {
     PROD: PROD,

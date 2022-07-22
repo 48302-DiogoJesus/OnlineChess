@@ -2,8 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 // Enable before pushing to heroku
 const PROD = true;
-if (!PROD)
+try {
     require('dotenv').config();
+}
+catch (e) { }
 const config = {
     PROD: PROD,
     // Change when deploying to process.env.PORT || 8080

@@ -63,6 +63,11 @@ body {
           box-shadow: 0 6px 6px black;
 }
 
+.global-container .auth-container h1 {
+  margin-bottom: 30px;
+  text-shadow: 0 4px 4px black;
+}
+
 .global-container .auth-container form {
   display: -webkit-box;
   display: -ms-flexbox;

@@ -54,7 +54,7 @@ class BoardObject {
             const possibleEndPositions = new Set();
             const piece = this.getPieceAt(piecePosition);
             if (piece === null)
-                return possibleEndPositions;
+                return new Set();
             for (let row = 0; row < exports.BOARD_HEIGHT; row++) {
                 for (let col = 0; col < exports.BOARD_WIDTH; col++) {
                     const currentPosition = (0, position_1.Position)(col, row);
@@ -93,6 +93,10 @@ class BoardObject {
         this.isPromotionMove = (moveAsString) => {
             const move = (0, position_1.stringToMove)(moveAsString);
             const piece = this.getPieceAt(move.start);
+            const targetPiece = this.getPieceAt(move.end);
+            if (targetPiece instanceof piece_1.King) {
+                return false;
+            }
             if (!(piece instanceof piece_1.Pawn)) {
                 return false;
             }
@@ -154,7 +158,7 @@ class BoardObject {
             for (let colNum = 0; colNum < exports.BOARD_WIDTH; colNum++) {
                 const pieceChar = rowStr[colNum];
                 if (pieceChar !== undefined) {
-                    this.setPieceAt((0, position_1.Position)(colNum, rowNum), (0, piece_1.charToPiece)(rowStr[colNum]));
+                    this.setPieceAt((0, position_1.Position)(colNum, rowNum), (0, piece_1.charToPiece)(pieceChar));
                 }
             }
         };

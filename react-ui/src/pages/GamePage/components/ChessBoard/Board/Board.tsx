@@ -4,7 +4,7 @@ import Tile, { TileColor } from '../Tile/Tile';
 import { BoardObject } from '../../../../../domain/board'
 import { Move, moveToString, Position, PositionObject } from '../../../../../domain/position'
 import { BoardError } from '../../../../../domain/errors';
-import { Piece, PieceColor } from '../../../../../domain/piece';
+import { King, Piece, PieceColor } from '../../../../../domain/piece';
 import { useState } from 'react';
 import Alerts from '../../../../../utils/Alerts/sa-alerts';
 
@@ -42,6 +42,7 @@ export default function Board(
         // Tile state
         selected={isSelected(row, column)}
         target={isTarget(row, column)}
+        lastMove={isFromLastMove(row, column)}
 
         // DARK or LIGHT 
         color={calcTileColor(row, column)}
@@ -53,6 +54,22 @@ export default function Board(
         onTileClick={() => handleTileClick(row, column, piece)}
       />
     )
+  }
+
+  const isFromLastMove = (row: number, column: number) => {
+    if (board.moves.length == 0)
+      return false
+
+    const lastMove = board.moves.at(-1)!!
+
+    if (
+      (lastMove.start.row == row && lastMove.start.column == column)
+      ||
+      (lastMove.end.row == row && lastMove.end.column == column)
+    ) {
+      return true
+    }
+    return false
   }
 
   const calcTileColor = (row: number, col: number) =>
@@ -96,7 +113,12 @@ export default function Board(
       // Select a tile + Show Possible Targets
       if (pieceClicked?.color == props.local_player_pieces) {
         setSelectedTile({ tile: positionClicked })
-        const targets = Array.from(board.generateAllPossibleTargets(positionClicked))
+        let targets = []
+        if (pieceClicked instanceof King) {
+          targets = Array.from(board.generateSafeKingTargets())
+        } else {
+          targets = Array.from(board.generateAllPossibleTargets(positionClicked))
+        }
         setTargetTiles(targets)
       }
     }
@@ -105,7 +127,12 @@ export default function Board(
       // Select a tile + Show Possible Targets
       if (pieceClicked?.color == props.local_player_pieces) {
         setSelectedTile({ tile: positionClicked })
-        const targets = Array.from(board.generateAllPossibleTargets(positionClicked))
+        let targets = []
+        if (pieceClicked instanceof King) {
+          targets = Array.from(board.generateSafeKingTargets())
+        } else {
+          targets = Array.from(board.generateAllPossibleTargets(positionClicked))
+        }
         setTargetTiles(targets)
       }
     }

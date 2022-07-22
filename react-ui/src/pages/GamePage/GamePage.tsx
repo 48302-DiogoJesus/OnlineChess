@@ -22,7 +22,7 @@ import GameState from './GameState/GameState'
 import Singleplayer from './GameState/Singleplayer'
 
 // LOW TIME BECAUSE ON DEVELOPMENT
-const UPDATE_GAME_TIMEOUT = 1000
+const UPDATE_GAME_TIMEOUT = 700
 
 export default function GamePage(props: any) {
   const navigate = useNavigate()
@@ -172,17 +172,16 @@ export default function GamePage(props: any) {
       Alerts.showNotification("Not your turn!")
       return
     }
-    // Validate move Locally (should never fail)
+    let finalMove = move
+
+    const promotion: boolean = gameState.board.isPromotionMove(move)
+    if (promotion) {
+      const pieceAsString = await GamePageUtils.askPromotionPiece(gameState.local_pieces)
+      finalMove = pieceAsString + move.substring(1)
+    }
+    // Validate + Execute move locally
     try {
-      const promotion: boolean = gameState.board.isPromotionMove(move)
-      if (promotion) {
-        const pieceAsString = await GamePageUtils.askPromotionPiece(gameState.local_pieces)
-        const promotionMove = pieceAsString + move.substring(1)
-        gameState.board.makeMove(promotionMove)
-        // MODIFY CHAR OF THE MOVE TO THE PROMOTION PIECE CHOOSEN
-      } else {
-        gameState.board.makeMove(move)
-      }
+      gameState.board.makeMove(finalMove)
     } catch (err) {
       Alerts.showNotification((err as BoardError).message)
       return
@@ -190,12 +189,11 @@ export default function GamePage(props: any) {
     // SINGLEPLAYER
     if (singleplayer) {
       setGameState(Singleplayer.switchTurn(gameState))
-      return
     }
     // MULTIPLAYER
     else {
       // Validate with server
-      const response = await Server.makeMove(game_id, move)
+      const response = await Server.makeMove(game_id, finalMove)
       if (!response.success) {
         Alerts.showNotification(`Invalid Move: ${(response.data as ServerError).message}`)
         return
@@ -205,6 +203,13 @@ export default function GamePage(props: any) {
       const newGameState = Multiplayer.updateFromRemote(gameState as IMultiplayerGS, remoteGame)
       setGameState(newGameState)
     }
+    playPieceSound()
+  }
+
+  function playPieceSound() {
+    var audio = new Audio(`../place_piece.wav`);
+    audio.loop = false;
+    audio.play();
   }
 
   function launchCriticalError(err: BoardError | ServerError) {

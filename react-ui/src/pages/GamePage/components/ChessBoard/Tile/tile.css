@@ -21,7 +21,7 @@
 }
 
 .tile.target {
-  background-color: rgba(99, 196, 2, 0.5);
+  background-color: rgba(98, 189, 6, 0.5);
 }
 
 .tile.light {
@@ -32,6 +32,14 @@
   background-color: #6ea13a;
   -webkit-filter: saturate(1.5);
           filter: saturate(1.5);
+}
+
+.tile.lastmove {
+  background-color: rgba(255, 255, 0, 0.35);
+}
+
+.tile.targetpiece {
+  background-color: rgba(255, 0, 0, 0.7);
 }
 
 .tile:hover {

@@ -28,6 +28,7 @@ export default function Signup(props: any) {
     return (
         <div className="global-container">
             <div className="auth-container">
+                <h1>SIGN UP</h1>
                 <form>
                     <label htmlFor="auth-username">USERNAME</label>
                     <input ref={username} type="text" className="auth-input" id="auth-username" name="username" /><br />

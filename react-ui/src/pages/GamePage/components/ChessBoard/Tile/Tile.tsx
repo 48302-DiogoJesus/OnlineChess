@@ -9,6 +9,8 @@ export default function Tile(
   props: {
     selected: boolean,
     target: boolean,
+    lastMove: boolean,
+
     position: PositionObject,
     color: TileColor,
     piece: PieceObject | null,
@@ -17,20 +19,27 @@ export default function Tile(
 
   const calcTileBackground = () => {
     if (props.selected)
-      return 'tile selected'
+      return 'selected'
 
     if (props.target)
-      return 'tile target'
+      if (props.piece == null)
+        return 'target'
+      else
+        return 'targetpiece'
+
+    if (props.lastMove) {
+      return 'lastmove'
+    }
 
     if (props.color === TileColor.DARK)
-      return 'tile dark'
+      return 'dark'
     else if (props.color === TileColor.LIGHT)
-      return 'tile light'
+      return 'light'
 
   }
 
   return (
-    <div className={calcTileBackground()} onClick={props.onTileClick}>
+    <div className={'tile ' + calcTileBackground()} onClick={props.onTileClick}>
       {
         props.piece === null
           ?

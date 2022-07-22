@@ -104,7 +104,7 @@ export class BoardObject {
     const possibleEndPositions = new Set<PositionObject>()
     const piece = this.getPieceAt(piecePosition)
     if (piece === null)
-      return possibleEndPositions
+      return new Set<PositionObject>()
 
     for (let row = 0; row < BOARD_HEIGHT; row++) {
       for (let col = 0; col < BOARD_WIDTH; col++) {
@@ -226,6 +226,12 @@ export class BoardObject {
   isPromotionMove = (moveAsString: string) => {
     const move = stringToMove(moveAsString)
     const piece = this.getPieceAt(move.start)
+    const targetPiece = this.getPieceAt(move.end)
+
+    if (targetPiece instanceof King) {
+      return false
+    }
+
     if (!(piece instanceof Pawn)) {
       return false
     }

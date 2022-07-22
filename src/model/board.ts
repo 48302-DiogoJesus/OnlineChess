@@ -19,6 +19,7 @@ import ERROR from '../errors/errors'
 export const BOARD_WIDTH = 8;
 export const BOARD_HEIGHT = 8;
 
+
 /**
  * Board Object
  * Representation of a board and all it's permitted operations
@@ -103,7 +104,7 @@ export class BoardObject {
     const possibleEndPositions = new Set<PositionObject>()
     const piece = this.getPieceAt(piecePosition)
     if (piece === null)
-      return possibleEndPositions
+      return new Set<PositionObject>()
 
     for (let row = 0; row < BOARD_HEIGHT; row++) {
       for (let col = 0; col < BOARD_WIDTH; col++) {
@@ -225,6 +226,12 @@ export class BoardObject {
   isPromotionMove = (moveAsString: string) => {
     const move = stringToMove(moveAsString)
     const piece = this.getPieceAt(move.start)
+    const targetPiece = this.getPieceAt(move.end)
+
+    if (targetPiece instanceof King) {
+      return false
+    }
+
     if (!(piece instanceof Pawn)) {
       return false
     }
@@ -327,7 +334,7 @@ export class BoardObject {
     for (let colNum = 0; colNum < BOARD_WIDTH; colNum++) {
       const pieceChar = rowStr[colNum]
       if (pieceChar !== undefined) {
-        this.setPieceAt(Position(colNum, rowNum), charToPiece(rowStr[colNum])!!)
+        this.setPieceAt(Position(colNum, rowNum), charToPiece(pieceChar))
       }
     }
   }

@@ -19,8 +19,6 @@ import { PersistGate } from 'redux-persist/integration/react'
 import { composeWithDevTools } from 'redux-devtools-extension';
 import thunk from 'redux-thunk'
 import NotFound from './pages/NotFound/NotFound';
-import config from './server/config';
-import State from './state/State';
 
 const persistConfig = {
   key: 'root',

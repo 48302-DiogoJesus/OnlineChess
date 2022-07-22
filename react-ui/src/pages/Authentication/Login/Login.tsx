@@ -31,6 +31,7 @@ export default function Login(props: any) {
     return (
         <div className="global-container">
             <div className="auth-container">
+                <h1>LOGIN</h1>
                 <form>
                     <label htmlFor="auth-username">USERNAME</label>
                     <input ref={username} type="text" className="auth-input" id="auth-username" name="username" /><br />
